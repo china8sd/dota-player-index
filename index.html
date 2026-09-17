@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dota Player Index — V8</title>
+<style>
+:root{--bg:#07090d;--panel:#0f1319;--panel2:#151a22;--line:#252d38;--txt:#f4f5f7;--mut:#8993a2;--gold:#d8a45f;--gold2:#8e6a3d;--green:#67d39a;--red:#ef7777;--blue:#7ca7ff;--shadow:0 18px 55px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 78% -5%,#2a2115 0,transparent 30%),radial-gradient(circle at 5% 35%,#111b28 0,transparent 25%),var(--bg);color:var(--txt);font:14px Inter,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1240px;margin:auto;padding:22px 16px 70px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:42px}.logo{font-weight:950;letter-spacing:.13em}.logo span{color:var(--gold)}.topnote{font-size:10px;color:var(--mut);letter-spacing:.12em}
+.hero{text-align:center;max-width:920px;margin:0 auto 28px}.ey{color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.24em}.hero h1{font-size:clamp(42px,7vw,82px);line-height:.92;letter-spacing:-.065em;margin:14px 0}.hero p{color:var(--mut);line-height:1.65;max-width:700px;margin:0 auto 24px}.search{display:flex;background:rgba(15,19,25,.94);border:1px solid var(--line);padding:6px;border-radius:15px;box-shadow:var(--shadow)}.search input{flex:1;background:transparent;border:0;outline:0;color:#fff;padding:14px;font-size:14px}.search button{background:var(--gold);border:0;border-radius:10px;font-weight:950;padding:0 24px;cursor:pointer}.hint{text-align:center;color:#5f6976;font-size:10px;margin-top:9px}
+#dash{display:none}.profile{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin:35px 0 15px}.identity{display:flex;align-items:center;gap:14px}.avatar{width:78px;height:78px;border-radius:16px;object-fit:cover;background:var(--panel2);border:1px solid var(--line)}.name{font-size:34px;font-weight:950;letter-spacing:-.04em}.mut{color:var(--mut)}.profile-side{display:flex;align-items:flex-end;gap:10px}.rankbox,.archbox{background:rgba(15,19,25,.94);border:1px solid var(--line);border-radius:13px;padding:9px 12px}.rankbox{display:flex;align-items:center;gap:9px}.rankIcon{width:44px;height:44px;object-fit:contain}.rankbox small,.archbox small{display:block;color:var(--mut);font-size:9px;letter-spacing:.13em}.rankbox b,.archbox b{display:block;margin-top:3px}.archbox b{color:var(--gold)}
+.nav{display:flex;gap:7px;overflow:auto;padding:4px 0 15px;position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 70%,transparent)}.nav button{white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:#cbd1d9;border-radius:9px;padding:8px 12px;cursor:pointer}.nav button:hover{border-color:#55462f;color:#fff}
+.grid{display:grid;grid-template-columns:1.45fr .85fr;gap:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:linear-gradient(145deg,var(--panel),#0b0e13);border:1px solid var(--line);border-radius:15px;padding:19px;box-shadow:0 7px 30px rgba(0,0,0,.12)}.card h2{font-size:13px;margin:0 0 14px;letter-spacing:.03em}.section{margin-top:14px}.pill{display:inline-block;color:var(--gold);background:#211c15;border:1px solid #3a3021;border-radius:99px;padding:6px 9px;font-size:9px;letter-spacing:.12em;margin-bottom:10px}.text{color:#cbd1d9;line-height:1.65;font-size:13px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metric{background:var(--panel2);border:1px solid #202733;border-radius:11px;padding:12px}.metricExplain{margin-top:8px;padding:8px 9px;background:#0d1218;border:1px solid #202733;border-radius:9px;font-size:9px;color:#aeb7c3;line-height:1.5}.metricExplain b{color:#e6b86a}.metricCompare{margin-top:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.cmp{background:#10151c;border:1px solid #202733;border-radius:8px;padding:6px 5px;text-align:center}.cmp small{display:block;color:#6f7987;font-size:8px}.cmp b{display:block;font-size:10px;margin-top:2px}.cmp .up{color:var(--green)}.cmp .down{color:var(--red)}.cmp .flat{color:#cbd1d9}.metricHint{font-size:8px;color:#68717e;margin-top:6px;line-height:1.4}.row{display:flex;justify-content:space-between;gap:10px}.score{font-size:20px;font-weight:850}.label{font-size:11px}.bar{height:5px;background:#29313b;margin-top:9px;border-radius:9px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#755a35,var(--gold));border-radius:9px}.delta{font-size:9px;margin-top:6px;color:var(--mut)}
+.bigindex{display:flex;align-items:center;gap:18px}.ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) var(--deg),#252d37 0)}.ring:after{content:"";width:84px;height:84px;background:var(--panel);border-radius:50%;position:absolute}.ring b{position:relative;z-index:1;font-size:29px}.indexcopy{flex:1}.indexcopy b{font-size:17px}.sub{color:var(--mut);font-size:11px;line-height:1.55;margin-top:5px}
+.statline{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.statline:last-child{border:0}.good{color:var(--green)}.bad{color:var(--red)}
+.rec{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}.rec:last-child{border:0}.num{width:25px;height:25px;flex:none;background:#252c35;border-radius:50%;display:grid;place-items:center;color:var(--gold);font-weight:900;font-size:11px}.rec b{font-size:12px}.rec p{margin:4px 0 0;color:var(--mut);font-size:11px;line-height:1.5}.goal{background:#121b18;border:1px solid #234032;border-radius:10px;padding:10px;color:#b8e6cb;font-size:11px;line-height:1.5}
+.heroes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.heroCard{display:flex;gap:10px;align-items:center}.heroPortrait{width:42px;height:42px;border-radius:8px;object-fit:cover;background:#0c1015;border:1px solid var(--line);flex:none}.heroCard .heroBody{min-width:0;flex:1}.heroCard{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px}.heroTop{display:flex;justify-content:space-between;gap:8px}.heroCard b{font-size:12px}.heroCard p{margin:5px 0 0;color:var(--mut);font-size:10px}.tag{font-size:8px;color:var(--gold);border:1px solid #4b3b25;border-radius:99px;padding:3px 5px}
+.bars{height:145px;display:flex;align-items:end;gap:5px}.b{flex:1;text-align:center}.b i{display:block;max-width:34px;margin:auto;border-radius:4px 4px 0 0}.b span{font-size:8px;color:#68717e}.wl{font-size:11px;color:var(--mut);margin-bottom:8px}.legend{display:flex;gap:12px;font-size:9px;color:var(--mut)}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.win{background:var(--green)}.loss{background:var(--red)}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:11px}.table th,.table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.table th{color:var(--mut);font-size:9px;letter-spacing:.08em}.minihero{width:34px;height:34px;border-radius:7px;object-fit:cover;vertical-align:middle;margin-right:7px;border:1px solid var(--line);background:#0c1015}.resultW{color:var(--green);font-weight:800}.resultL{color:var(--red);font-weight:800}
+.timeline{display:flex;gap:9px;overflow:auto;padding-bottom:5px}.snapshot{min-width:180px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px}.snapshot b{font-size:13px}.snapshot p{margin:5px 0;color:var(--mut);font-size:10px}.share{display:flex;gap:9px;flex-wrap:wrap}.share button{background:var(--panel2);border:1px solid var(--line);color:#fff;border-radius:9px;padding:10px 13px;cursor:pointer}.status{text-align:center;color:var(--mut);padding:22px}.error{color:var(--red)}.potential{display:flex;align-items:center;justify-content:space-between;gap:15px;background:linear-gradient(135deg,#17140f,#11151b);border:1px solid #3a3021;border-radius:12px;padding:14px}.potential b{font-size:20px}.potential .potMain{color:var(--gold)}.potential p{margin:4px 0 0;color:var(--mut);font-size:10px;line-height:1.45}.rolebadge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#11161d;color:#cbd1d9;font-size:9px}.rolebadge b{color:var(--gold)}.percentile{font-size:9px;color:#9aa4b2;margin-top:4px}.metricCompare .cmp{min-height:38px}.axisWhy{margin-top:7px;font-size:9px;color:#778290;line-height:1.45}.potentialGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}.nextlevel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}.nextlevel h3{margin:0 0 8px;font-size:11px}.nextlevel .nl{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #202733;font-size:10px}.nextlevel .nl:last-child{border-bottom:0}.confidenceBox{display:flex;align-items:center;gap:8px;margin-top:8px}.confidenceBar{height:5px;flex:1;background:#29313b;border-radius:8px;overflow:hidden}.confidenceBar i{display:block;height:100%;background:var(--gold)}.telegramStart{display:inline-flex;margin-top:12px;color:var(--gold);text-decoration:none;font-size:10px;font-weight:800;padding:8px 12px;border:1px solid #4b3b25;border-radius:999px;background:#11161d}.telegramStart:hover{text-decoration:underline}.roleSwitch{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.roleSwitch button{background:#11161d;border:1px solid var(--line);color:#9aa4b2;border-radius:999px;padding:5px 9px;font-size:9px;cursor:pointer}.roleSwitch button.active{color:var(--gold);border-color:#6b532e}.heroMode{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.heroMode button{background:#11161d;border:1px solid var(--line);color:#9aa4b2;border-radius:999px;padding:6px 10px;font-size:9px;cursor:pointer}.heroMode button.active{color:var(--gold);border-color:#6b532e}.creator{text-align:center;margin:28px 0 0;color:#626d7b;font-size:10px}.creator a{color:var(--gold);text-decoration:none}.creator a:hover{text-decoration:underline}.note{font-size:9px;color:#66717e;line-height:1.55;margin-top:10px}.source{font-size:9px;color:#5d6875}.hidden{display:none!important}@media(max-width:700px){.potentialGrid{grid-template-columns:1fr}}
+@media(max-width:900px){.grid,.grid2{grid-template-columns:1fr}.profile{align-items:flex-start;flex-direction:column}.profile-side{align-items:flex-start}.archbox{margin-top:0}}@media(max-width:560px){.metrics{grid-template-columns:1fr}.heroes{grid-template-columns:1fr 1fr}.search{flex-direction:column}.search button{height:45px}.name{font-size:27px}.avatar{width:64px;height:64px}.profile-side{width:100%;flex-wrap:wrap}.rankbox,.archbox{flex:1}.nav{position:relative}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo">DOTA <span>PLAYER INDEX</span></div><div class="topnote">V7 · PLAYER ANALYTICS</div></header>
+<section class="hero" id="landing"><div class="ey">REAL MATCH DATA · PLAYER PROFILE</div><h1>Пойми, <span style="color:var(--gold)">почему</span> ты играешь так.</h1><p>Не просто KDA. Анализируем темп, фарм, смерти, командное участие, объекты, пул героев и стабильность — и превращаем это в понятный план следующих 20 игр.</p><div class="search"><input id="steamInput" placeholder="Steam ID или https://steamcommunity.com/profiles/..." autocomplete="off"><button id="analyze">ANALYZE PLAYER</button></div><div class="hint">Профиль Steam должен быть доступен для публичного просмотра матчей.</div><a class="telegramStart" href="https://t.me/chinasd787" target="_blank" rel="noopener">📢 Telegram автора · @chinasd787</a></section>
+<div id="status" class="status hidden"></div>
+<section id="dash">
+<div class="profile"><div class="identity"><img id="avatar" class="avatar"><div><div id="name" class="name">—</div><div id="meta" class="mut">—</div><div id="roleBadge" class="rolebadge"></div><div id="roleSwitch" class="roleSwitch hidden"></div></div></div><div class="profile-side"><div class="rankbox"><img id="rankIcon" class="rankIcon"><div><small>RANK</small><b id="rankName">—</b></div></div><div class="archbox"><small>АРХЕТИП</small><b id="arch">—</b></div></div></div>
+<div class="nav"><button data-go="overview">Обзор</button><button data-go="performance">Показатели</button><button data-go="heroes">Герои</button><button data-go="matches">Матчи</button><button data-go="training">Тренировка</button><button data-go="history">История</button><button data-go="share">Share card</button></div>
+<div id="overview" class="section grid"><div class="card"><h2>PLAYER INDEX</h2><div class="bigindex"><div id="ring" class="ring" style="--deg:0deg"><b id="indexScore">—</b></div><div class="indexcopy"><b id="indexTitle">Анализируем профиль…</b><div id="indexSub" class="sub">—</div></div></div><div class="note">Player Index — наш аналитический индекс, а не официальный MMR. Он рассчитывается из наблюдаемых игровых показателей и уверенности выборки.</div></div><div class="card"><h2>ГЛАВНЫЙ ВЫВОД</h2><div id="mainInsight" class="text">—</div><div class="goal" id="goal" style="margin-top:12px">—</div></div></div>
+<div class="section card"><h2>ПОЧЕМУ ТЫ ПРОИГРЫВАЕШЬ</h2><div id="lossAnalysis" class="text">—</div><div class="note">Это поиск повторяющихся различий между твоими победами и поражениями по доступным данным матчей. Это не доказательство причины поражения.</div></div><div class="section grid2"><div class="card"><h2>СИЛЬНЫЕ СТОРОНЫ</h2><div id="strengths" class="text">—</div></div><div class="card"><h2>ЗОНЫ РОСТА</h2><div id="weaknesses" class="text">—</div></div></div>
+<div id="performance" class="section card">
+<h2>PLAYER INDEX · 10 ОСЕЙ</h2>
+<div id="metrics" class="metrics"></div>
+<div class="note">Сравнение ниже показывает ориентир относительно выборки игроков: <b>текущий ранг</b>, <b>на один ранг выше</b> и <b>на два ранга выше</b>. Это модельная benchmark-оценка, а не официальная статистика Valve. Мы не выдаём её за точный процентиль, пока не накоплена собственная большая база матчей.</div>
+</div>
+<div class="section card">
+<h2>ПОТЕНЦИАЛ РОСТА РЕЙТИНГА</h2>
+<div class="potentialGrid">
+<div id="potential" class="potential"><div><b id="potentialLevel" class="potMain">—</b><p id="potentialText">—</p><div class="confidenceBox"><span class="source">уверенность</span><div class="confidenceBar"><i id="potentialConfidence" style="width:0%"></i></div><span id="potentialConfidenceText" class="source">—</span></div></div><div id="potentialDelta" class="score">—</div></div>
+<div id="nextLevel" class="nextlevel"><h3>ЧТО НУЖНО ДО СЛЕДУЮЩЕГО УРОВНЯ</h3><div id="nextLevelRows"></div></div>
+</div>
+<div class="note">Это не прогноз будущего MMR. Это оценка запаса для улучшения по текущим игровым ошибкам: что может измениться, если закрыть главные зоны роста.</div>
+</div>
+<div class="section grid2"><div class="card"><h2>ПОСЛЕДНИЕ 10 ИГР</h2><div id="wltext" class="wl">—</div><div id="results" class="bars"></div><div class="legend"><span><i class="dot win"></i>WIN</span><span><i class="dot loss"></i>LOSS</span></div></div><div class="card"><h2>ФОРМА</h2><div id="formStats"></div></div></div>
+<div id="heroes" class="section card"><h2>ГЕРОИ · ПУЛ И СТИЛЬ</h2><div id="heroCards" class="heroes"></div><div class="card" style="margin-top:12px;background:#11161d"><h3 style="margin:0 0 6px;font-size:13px">🔥 ГЕРОИ ДЛЯ ТВОЕЙ РОЛИ В ЭТОМ ПАТЧЕ</h3><div id="patchInfo" class="note">Загрузка текущей статистики…</div><div class="heroMode"><button id="heroModeMeta" class="active">🔥 Мета</button><button id="heroModeMine">🎮 Мои герои</button></div><div id="recommendedHeroes" class="heroes" style="margin-top:10px"></div></div><div class="note">Hero score учитывает количество игр, winrate и объём выборки. 1–2 игры не объявляются «лучшим героем».</div></div>
+<div id="realBenchmark" class="section card"><h2>📊 РЕАЛЬНЫЙ BENCHMARK · OPEN DOTA</h2><div id="benchmarkStatus" class="note">Загрузка hero-specific benchmark…</div><div id="benchmarkCards" class="metrics" style="margin-top:10px"></div><div class="note">Здесь используются реальные percentile-данные OpenDota для конкретных героев. Это не общий percentile игрока по рангу: OpenDota публикует benchmark по герою, поэтому мы не смешиваем эти данные с модельным benchmark осей.</div></div>
+<div id="matches" class="section card"><h2>ПОСЛЕДНИЕ МАТЧИ</h2><div class="tablewrap"><table class="table"><thead><tr><th>РЕЗУЛЬТАТ</th><th>ГЕРОЙ</th><th>K/D/A</th><th>GPM</th><th>XPM</th><th>LH</th><th>DMG</th><th>ВРЕМЯ</th></tr></thead><tbody id="matchRows"></tbody></table></div></div>
+<div id="training" class="section grid2"><div class="card"><h2>ЧТО ТРЕНИРОВАТЬ · СЛЕДУЮЩИЕ 20 ИГР</h2><div id="recs"></div></div><div class="card"><h2>20-GAME MISSION</h2><div id="mission" class="text">—</div><div class="goal" id="missionGoal" style="margin-top:12px">—</div></div></div>
+<div id="history" class="section card"><h2>ИСТОРИЯ АНАЛИЗОВ НА ЭТОМ УСТРОЙСТВЕ</h2><div id="timeline" class="timeline"></div><div class="note">История хранится локально в браузере. Это MVP-версия прогресса; полноценная синхронизация между устройствами появится после подключения backend.</div></div>
+<div id="share" class="section card"><h2>SHARE CARD</h2><div id="shareText" class="text">—</div><div class="share"><button id="copyBtn">Скопировать результат</button><button id="copyLinkBtn">Скопировать ссылку</button></div></div>
+<div class="note" style="margin-top:18px">Источник игровых данных: OpenDota API. API предоставляет профиль игрока, матчи, героев, totals, win/loss, rankings, peers и другие аналитические endpoints. citeturn0search0turn0search4</div>
+</section>
+</div>
+<script>
+const API='https://api.opendota.com/api';
+const $=id=>document.getElementById(id);
+let STATE=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function idOf(input){const raw=String(input||'').trim();if(!raw)throw Error('Вставь Steam ID или ссылку на Steam-профиль.');const pm=raw.match(/steamcommunity\.com\/profiles\/(\d+)/i);const vm=raw.match(/steamcommunity\.com\/id\/([^/?#]+)/i);let v=pm?.[1]||raw.match(/(?:^|\D)(7656119\d{10})(?:\D|$)/)?.[1];if(!v&&vm)throw Error('Ссылки /id/username пока не резолвятся. Используй /profiles/7656119...');if(!v){const d=raw.replace(/\D/g,'');if(!d)throw Error('Steam ID не найден.');v=d}let n=BigInt(v),base=76561197960265728n;if(n>=base)n-=base;if(n<=0n||n>4294967295n)throw Error('Некорректный Steam ID.');return Number(n)}
+async function get(path){const r=await fetch(API+path);if(!r.ok)throw Error('OpenDota HTTP '+r.status);return r.json()}
+function isWin(m){return (Number(m.player_slot||0)<128)===Boolean(m.radiant_win)}
+function rankInfo(t){
+ const n=Number(t||0);if(!n)return {name:'Не определён',icon:''};
+ const medal=Math.min(8,Math.floor(n/10)),stars=n%10;
+ const names=['','Herald','Guardian','Crusader','Archon','Legend','Ancient','Divine','Immortal'];
+ const name=(names[medal]||'Unknown')+(medal<8&&stars?' '+stars:'');
+ const palette=['#666','#8e8e8e','#4aa3df','#8d69d1','#e0a34a','#b8b8b8','#75a6d6','#d86b45','#f0c66d'];
+ const c=palette[medal]||'#d8a45f';
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c}"/><stop offset="1" stop-color="#222"/></linearGradient></defs><path d="M40 4 69 16v25c0 18-12 29-29 35C23 70 11 59 11 41V16L40 4Z" fill="url(#g)" stroke="#eee" stroke-opacity=".28" stroke-width="2"/><path d="M40 15 58 23v17c0 11-7 19-18 24-11-5-18-13-18-24V23l18-8Z" fill="#111923" fill-opacity=".55"/><path d="M28 35h24M40 23v25" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/></svg>`;
+ return {name,icon:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg)};
+}
+const avg=(a,k)=>{const v=a.map(x=>Number(x[k])).filter(Number.isFinite);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null};
+const med=(a,k)=>{const v=a.map(x=>Number(x[k])).filter(Number.isFinite).sort((x,y)=>x-y);if(!v.length)return null;return v[Math.floor(v.length/2)]};
+const clamp=(x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+function pctRank(v,lo,hi){if(v==null)return 50;return clamp((v-lo)/(hi-lo)*100)}
+function dominantRole(m){
+ const roles=m.map(x=>Number(x.lane_role)).filter(x=>x>=1&&x<=4);
+ if(!roles.length)return {id:0,name:'Роль не определена'};
+ const c={1:0,2:0,3:0,4:0};roles.forEach(x=>c[x]++);
+ const id=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];
+ const names={1:'Carry / Safe lane',2:'Mid',3:'Offlane',4:'Support'};
+ return {id:Number(id),name:names[id]||'Hybrid'};
+}
+function roleWeights(role){
+ const w={
+  1:{farming:1.35,economy:1.2,scaling:1.25,survival:1.05,mechanics:1.0,aggression:.85,teamfight:.85,map:.85,objectives:.95,consistency:1},
+  2:{farming:1.05,economy:1.05,scaling:1, survival:1,mechanics:1.2,aggression:1.2,teamfight:1,map:1.15,objectives:1.05,consistency:1},
+  3:{farming:.9,economy:.9,scaling:.85,survival:1.15,mechanics:1,aggression:1.05,teamfight:1.2,map:1.15,objectives:1.2,consistency:1},
+  4:{farming:.65,economy:.7,scaling:.65,survival:1.0,mechanics:1.05,aggression:.95,teamfight:1.25,map:1.3,objectives:1.15,consistency:1.05}
+ };
+ return w[role]||w[1];
+}
+function metricData(m){
+ const n=Math.max(1,m.length), role=dominantRole(m);
+ const av=k=>avg(m,k), lh=av('last_hits'), g=av('gold_per_min'), x=av('xp_per_min');
+ const k=av('kills'),d=av('deaths'),a=av('assists'),hd=av('hero_damage'),td=av('tower_damage'),tf=av('teamfight_participation');
+ const obs=av('obs_placed'),sen=av('sen_placed'),dur=av('duration');
+ const kda=clamp(((k+a)/(d+1))*18,0,100);
+ const farming=clamp(pctRank(lh,50,420)*.42+pctRank(g,280,750)*.38+pctRank(x,300,850)*.20);
+ const mechanics=clamp(pctRank(kda,15,55)*.45+pctRank(hd,5000,50000)*.35+pctRank(tf,0.25,.75)*.20);
+ const survival=clamp(pctRank(1/(d+1),.08,.5)*.55+pctRank(g,280,750)*.10+pctRank(x,300,850)*.10+pctRank(tf,0.2,.75)*.25);
+ const aggression=clamp(pctRank(k+a/2,2,18)*.55+pctRank(hd,5000,50000)*.25+pctRank(tf,.25,.8)*.20);
+ const teamfight=clamp(pctRank(tf,.2,.8)*.55+pctRank(a,2,20)*.20+pctRank(hd,5000,50000)*.15+pctRank(k,1,12)*.10);
+ const map=clamp(pctRank(a,2,20)*.28+pctRank(tf,.2,.8)*.22+pctRank(obs,0,12)*.18+pctRank(sen,0,8)*.12+pctRank(td,0,6000)*.20);
+ const objectives=clamp(pctRank(td,500,8000)*.70+pctRank(tf,.2,.8)*.10+pctRank(a,4,18)*.20);
+ const consistency=clamp(100-Math.min(55,std(m,'kills')*4)-Math.min(40,std(m,'deaths')*4)-Math.min(25,std(m,'gold_per_min')/25),0,100);
+ const economy=clamp(pctRank(g,300,750)*.70+pctRank(x,350,850)*.30);
+ const scaling=clamp(pctRank(lh,80,400)*.40+pctRank(x,350,850)*.25+pctRank(g,300,750)*.35);
+ return {farming,mechanics,survival,aggression,teamfight,map,objectives,consistency,economy,scaling,kda,role,raw:{d,k,a,lh,g,x,hd,td,tf,obs,sen,dur,n}};
+}
+function std(a,k){const v=a.map(x=>Number(x[k])).filter(Number.isFinite);if(v.length<2)return 0;const av=v.reduce((s,x)=>s+x,0)/v.length;return Math.sqrt(v.reduce((s,x)=>s+(x-av)**2,0)/(v.length-1))}
+function confidence(n){return n>=50?1:n>=30?.9:n>=20?.8:n>=10?.65:.45}
+function analyze(m){
+ const q=metricData(m),c=confidence(m.length),keys=['farming','mechanics','survival','aggression','teamfight','map','objectives','consistency','economy','scaling'];
+ const weights=roleWeights(q.role.id);let sum=0,ws=0;
+ for(const key of keys){sum+=q[key]*weights[key];ws+=weights[key]}
+ const base=sum/ws,index=Math.round(clamp(base*.92+q.kda*.08));
+ let arch='Hybrid Player';
+ if(q.role.id===1&&q.farming>=72&&q.survival>=68&&q.scaling>=65)arch='Farming Carry';
+ else if((q.role.id===2||q.role.id===3)&&q.aggression>=72&&q.teamfight>=65)arch='Tempo / Aggressive';
+ else if(q.map>=68&&q.objectives>=65)arch='Map Controller';
+ else if(q.teamfight>=73)arch='Teamfight Player';
+ else if(q.survival>=78&&q.aggression<55)arch='Defensive Player';
+ const sorted=[...keys].sort((a,b)=>q[b]-q[a]),weak=[...keys].sort((a,b)=>q[a]-q[b]);
+ return {...q,index,arch,top:sorted.slice(0,3),low:weak.slice(0,4),confidence:c};
+}
+function heroNameMap(stats){const x={};for(const h of stats||[])x[h.id]=h.localized_name;return x}
+function heroImageMap(stats){const x={};for(const h of stats||[]){let u=h.img||h.icon||'';if(u&&!/^https?:/i.test(u))u='https://cdn.cloudflare.steamstatic.com'+u;x[h.id]=u}return x}
+
+function heroAnalysis(h){return (h||[]).map(x=>({...x,games:Number(x.games||0),wins:Number(x.win||0),wr:x.games?x.win/x.games*100:0,confidence:x.games>=30?'HIGH':x.games>=10?'MED':'LOW'})).sort((a,b)=>b.games-a.games)}
+function formatMin(s){const n=Math.round((s||0)/60);return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')}
+function pct(v){return Number.isFinite(v)?v.toFixed(1)+'%':'—'}
+
+const AXIS_LABELS={farming:'Фарм',mechanics:'Механика',survival:'Выживаемость',aggression:'Агрессия',teamfight:'Командные драки',map:'Влияние на карту',objectives:'Объекты',consistency:'Стабильность',economy:'Экономика',scaling:'Скейлинг'};
+function rankMedal(t){const n=Number(t||0);return Math.max(1,Math.min(8,Math.floor(n/10)||1))}
+function rankBandLabel(m){return m>=8?'Immortal':AXIS_LABELS[m]||(['','Herald','Guardian','Crusader','Archon','Legend','Ancient','Divine','Immortal'][m]||'Rank')}
+function benchmarkForAxis(axis,q,rankTier){
+ const r=rankMedal(rankTier), role=q.role?.id||1;
+ const roleAdj={
+  1:{farming:6,economy:5,scaling:6,survival:2,mechanics:0,aggression:-2,teamfight:-2,map:-1,objectives:0,consistency:1},
+  2:{farming:1,economy:1,scaling:0,survival:0,mechanics:5,aggression:5,teamfight:2,map:4,objectives:2,consistency:1},
+  3:{farming:-1,economy:-1,scaling:-2,survival:4,mechanics:1,aggression:2,teamfight:5,map:4,objectives:5,consistency:2},
+  4:{farming:-5,economy:-5,scaling:-5,survival:1,mechanics:2,aggression:0,teamfight:6,map:7,objectives:5,consistency:3}
+ }[role]||{};
+ const base={farming:56,mechanics:55,survival:59,aggression:54,teamfight:57,map:55,objectives:54,consistency:61,economy:56,scaling:58}[axis]+(roleAdj[axis]||0);
+ const slope={farming:4.1,mechanics:4.0,survival:3.5,aggression:3.7,teamfight:3.9,map:4.0,objectives:3.7,consistency:3.0,economy:3.9,scaling:3.8}[axis];
+ const same=clamp(base+(r-1)*slope,25,92),higher1=clamp(same+slope*.95,25,97),higher2=clamp(higher1+slope*.82,25,99);
+ return {same,higher1,higher2};
+}
+function percentileModel(v,b){return Math.round(clamp(50+(v-b)*3.2,2,98))}
+function cmpText(v,b){const d=v-b;if(d>=8)return `<span class="up">+${Math.round(d)}</span>`;if(d<=-8)return `<span class="down">${Math.round(d)}</span>`;return `<span class="flat">${d>=0?'+':''}${Math.round(d)}</span>`}
+function renderMetrics(q,rankTier){
+ const explain={
+  farming:['Фарм','Сколько ресурсов ты получаешь: крипы, GPM и XP.','Больше = быстрее получаешь золото и уровни.'],
+  mechanics:['Механика','Насколько хорошо ты реализуешь героя: убийства, урон и участие в драках.','Больше = лучше реализуешь возможности героя.'],
+  survival:['Выживаемость','Как часто ты сохраняешь жизнь и своё преимущество.','Больше = меньше лишних смертей.'],
+  aggression:['Агрессия','Насколько активно ты создаёшь давление на врага.','Больше = чаще создаёшь опасные для соперника моменты.'],
+  teamfight:['Командные драки','Насколько полезен ты в ключевых драках команды.','Больше = чаще влияешь на исход важных драк.'],
+  map:['Влияние на карту','Насколько ты помогаешь команде за пределами своей линии.','Больше = больше полезных действий по карте.'],
+  objectives:['Объекты','Насколько ты превращаешь преимущество в вышки и другие цели.','Больше = лучше конвертируешь драки в результат.'],
+  consistency:['Стабильность','Насколько одинаково хорошо ты играешь от матча к матчу.','Больше = меньше сильных провалов.'],
+  economy:['Экономика','Насколько эффективно ты превращаешь время в золото и XP.','Больше = быстрее достигаешь нужных предметов и уровней.'],
+  scaling:['Поздняя игра','Насколько хорошо твой стиль сохраняет ценность по ходу матча.','Больше = сильнее используешь длинную игру.']
+ };
+ const html=Object.entries(AXIS_LABELS).map(([key,label])=>{
+  const b=benchmarkForAxis(key,q,rankTier),v=Math.round(q[key]);
+  const p0=percentileModel(v,b.same);
+  const [title,meaning,good]=explain[key];
+  const diff=Math.round(v-b.same);
+  const verdict=diff>=8?'выше ориентира твоего ранга':diff<=-8?'ниже ориентира твоего ранга':'примерно на уровне ориентира твоего ранга';
+  return `<div class="metric"><div class="row"><span class="label">${title}</span><b class="score">${v}</b></div><div class="bar"><div class="fill" style="width:${v}%"></div></div><div class="metricExplain"><b>Что это:</b> ${meaning}<br><b>Твой результат:</b> ${good} Сейчас ты ${verdict} (${diff>=0?'+':''}${diff}).</div><div class="metricCompare"><div class="cmp"><small>ТЫ</small><b>${v}/100</b></div><div class="cmp"><small>ТВОЙ РАНГ</small><b>${cmpText(v,b.same)}</b></div><div class="cmp"><small>МОДЕЛЬНЫЙ %</small><b>~${p0}</b></div></div><div class="axisWhy">Расчёт учитывает твою роль: <b>${esc(q.role?.name||'роль выбрана вручную')}</b>. Сравнение ранга пока модельное.</div></div>`;
+ }).join('');
+ $('metrics').innerHTML=html;
+}
+
+function insight(q){
+ const labels={farming:'фарма',mechanics:'механики',survival:'выживаемости',aggression:'агрессии',teamfight:'командного участия',map:'влияния на карту',objectives:'объектов',consistency:'стабильности',economy:'экономики',scaling:'скейлинга'};
+ const lo=q.low[0],hi=q.top[0];
+ if(q.farming-q.map>18)return 'Ты хорошо превращаешь время в фарм, но часть экономического преимущества не конвертируется во влияние на карту. Главный рычаг — быстрее переводить ресурс в действие.';
+ if(q.objectives<45)return 'После выигранных моментов не хватает конвертации в объекты. Следующий шаг — связывать убийства и выигранные драки с вышками, Рошаном, виженом или безопасной территорией.';
+ if(q.survival<45)return 'Главный ограничитель — смерти. Для твоей роли особенно важно заранее видеть опасную зону и сохранять ресурс после полученного преимущества.';
+ if(q.teamfight<45)return 'Ты можешь создавать ресурс, но мало участвуешь в ключевых командных эпизодах. Отслеживай TP, smoke, ультимейты и тайминги предметов.';
+ return `Твоя самая заметная сторона сейчас — ${labels[hi]} (${Math.round(q[hi])}). Главная зона роста — ${labels[lo]} (${Math.round(q[lo])}). Для роли ${q.role.name} именно она сильнее всего тянет общий профиль вниз.`;
+}
+
+function renderPotential(q,rankTier){
+ const weak=q.low.slice(0,3),avgWeak=weak.reduce((a,b)=>a+q[b],0)/Math.max(1,weak.length);
+ const headroom=Math.max(0,Math.round((100-avgWeak)*.42+Math.max(0,70-q.index)*.18));
+ let level='Низкий',tone='Основной резерв уже относительно небольшой: важнее закрепить сильные стороны.';
+ if(headroom>=20){level='Средний';tone='Есть заметный запас: закрытие 2–3 системных ошибок должно заметно поднять игровой профиль.'}
+ if(headroom>=32){level='Высокий';tone='Есть большой запас: несколько слабых зон сейчас одновременно ограничивают профиль.'}
+ const next=Math.min(100,Math.round(q.index+headroom));
+ $('potentialLevel').textContent=level;$('potentialDelta').textContent=`+${headroom} Index`;
+ $('potentialText').textContent=`${tone} Модельный сценарий: ${q.index} → около ${next}. Это не прогноз конкретного MMR.`;
+ $('potentialConfidence').style.width=Math.round(q.confidence*100)+'%';$('potentialConfidenceText').textContent=Math.round(q.confidence*100)+'%';
+ const order=weak.slice(0,3).map(k=>({k,v:Math.round(q[k]),b:Math.round(benchmarkForAxis(k,q,rankTier).higher1)}));
+ $('nextLevelRows').innerHTML=order.map(x=>`<div class="nl"><span>${AXIS_LABELS[x.k]}</span><b>${x.v} → ${x.b}+</b></div>`).join('');
+}
+
+function heroRoleMatch(hero,role){
+ const roles=hero.roles||[];
+ if(role===1)return roles.includes('Carry');
+ if(role===2)return roles.includes('Carry')||roles.includes('Nuker')||roles.includes('Escape');
+ if(role===3)return roles.includes('Durable')||roles.includes('Initiator')||roles.includes('Disabler');
+ if(role===4)return roles.includes('Support')||roles.includes('Disabler')||roles.includes('Nuker');
+ return true;
+}
+function rankHeroWR(hero,rankTier){
+ const medal=rankMedal(rankTier), pick=Number(hero[`${medal}_pick`]||0), win=Number(hero[`${medal}_win`]||0);
+ return {pick,win,wr:pick?win/pick*100:null};
+}
+async function loadRealHeroBenchmarks(heroIds, personal){
+ const ids=[...new Set(heroIds.map(Number).filter(Boolean))].slice(0,6);
+ const out=[];
+ for(const id of ids){
+   try{const b=await get(`/benchmarks?hero_id=${id}`);out.push({hero_id:id,b});}catch(e){/* one hero benchmark can fail without breaking the whole report */}
+ }
+ const byHero=new Map((personal||[]).map(x=>[Number(x.hero_id),x]));
+ $('benchmarkStatus').textContent=out.length?`Реальные данные OpenDota · ${out.length} героев · percentile по конкретному герою.`:'OpenDota не вернул benchmark для выбранных героев.';
+ const metricMap=[['gold_per_min','GPM'],['xp_per_min','XPM'],['last_hits_per_min','LH/min'],['hero_damage_per_min','Hero dmg/min'],['tower_damage','Tower dmg']];
+ const cards=[];
+ for(const row of out){
+   const result=row.b?.result||{}; const personalRow=byHero.get(row.hero_id); const heroName=STATE?.names?.[row.hero_id]||`Hero ${row.hero_id}`;
+   const vals=[];
+   for(const [key,label] of metricMap){
+     const arr=Array.isArray(result[key])?result[key]:[]; if(!arr.length) continue;
+     const med=arr.find(x=>Number(x.percentile)===0.5)||arr.find(x=>Math.abs(Number(x.percentile)-0.5)<0.001);
+     const p75=arr.find(x=>Math.abs(Number(x.percentile)-0.75)<0.001);
+     const p90=arr.find(x=>Math.abs(Number(x.percentile)-0.9)<0.001);
+     const v=med?.value ?? arr[Math.floor(arr.length/2)]?.value;
+     if(v!=null) vals.push(`<div class="cmp"><small>${label}</small><b>${Math.round(Number(v))}</b><span class="percentile">P50${p75?` · P75 ${Math.round(Number(p75.value))}`:''}${p90?` · P90 ${Math.round(Number(p90.value))}`:''}</span></div>`);
+   }
+   cards.push(`<div class="metric"><div class="row"><span class="label"><b>${esc(heroName)}</b></span><span class="tag">${personalRow?.games||0} твоих игр</span></div><div class="metricCompare" style="grid-template-columns:repeat(2,1fr);margin-top:10px">${vals.join('')}</div></div>`);
+ }
+ $('benchmarkCards').innerHTML=cards.join('')||'<div class="note">Недостаточно benchmark-данных.</div>';
+}
+
+function renderRecommendedHeroes(hs, personal, role, rankTier, patchName, mode='meta'){
+ const personalMap={};for(const x of personal||[])personalMap[x.hero_id]=x;
+ let candidates=(hs||[]).filter(h=>heroRoleMatch(h,role)).map(h=>{const r=rankHeroWR(h,rankTier),mine=personalMap[h.id];const mg=mine?Number(mine.games||0):0,mwr=mg?Number(mine.win||0)/mg*100:null;const sample=Math.min(1,Math.log10(Math.max(10,r.pick))/4);const score=(r.wr??50)*.82+(mwr??50)*.08+sample*10;return {...h,...r,mwr,mg,score}}).filter(x=>x.pick>=30&&x.wr!=null);
+ if(mode==='mine') candidates=candidates.filter(x=>x.mg>0).sort((a,b)=>b.mwr-a.mwr||b.mg-a.mg).slice(0,6);
+ else candidates=candidates.sort((a,b)=>b.score-a.score).slice(0,8);
+ $('patchInfo').textContent=`${patchName||'Текущий патч'} · OpenDota heroStats · роль ${({1:'Carry',2:'Mid',3:'Offlane',4:'Support'})[role]||'—'} · ${mode==='mine'?'твоя выборка':'вся доступная мета-выборка'}.`;
+ $('recommendedHeroes').innerHTML=candidates.map(x=>`<div class="heroCard"><img class="heroPortrait" src="${STATE.images[x.id]||''}" onerror="this.style.visibility='hidden'" alt=""><div class="heroBody"><div class="heroTop"><b>${esc(x.localized_name)}</b><span class="tag">${mode==='mine'&&x.mwr!=null?`Твой WR ${x.mwr.toFixed(1)}%`:`${x.wr.toFixed(1)}% WR`}</span></div><p>${Number(x.pick).toLocaleString('ru-RU')} игр в этом ранге · ${x.mg?`у тебя ${x.mg} игр`:'ты ещё не играл на нём'}</p></div></div>`).join('')||`<div class="note">${mode==='mine'?'У тебя пока нет достаточной выборки героев на этой роли. Переключись на «🔥 Мета».':'Для этой роли API пока не вернул достаточную выборку.'}</div>`;
+ const meta=$('heroModeMeta'),mine=$('heroModeMine');if(meta&&mine){meta.classList.toggle('active',mode==='meta');mine.classList.toggle('active',mode==='mine');meta.onclick=()=>renderRecommendedHeroes(hs,personal,role,rankTier,patchName,'meta');mine.onclick=()=>renderRecommendedHeroes(hs,personal,role,rankTier,patchName,'mine');}
+}
+
+function recommendations(q){const arr=[];if(q.survival<60)arr.push(['Снизить повторные смерти','Перед каждым опасным заходом задай два вопроса: где 5 врагов и какой у меня путь отхода? Цель — уменьшить среднее число смертей, не просто играть пассивнее.']);if(q.objectives<60||q.map<60)arr.push(['Конвертировать преимущество','После выигранной драки выбери один объект: tower, Roshan, vision или безопасная зона фарма. Не возвращайся автоматически в лес.']);if(q.teamfight<60)arr.push(['Увеличить полезное участие','На следующих 20 играх отмечай 3–4 ключевых драки и проверяй: был ли ты рядом в момент, когда команда реально могла получить преимущество?']);if(q.farming<60)arr.push(['Поднять качество фарма','Следи не только за LH, но и за тем, сколько времени ты тратишь на пустые перемещения. Цель — больше золота без увеличения риска.']);if(q.consistency<60)arr.push(['Убрать крайние игры','После плохого старта не меняй стиль на авантюрный. Сохраняй одинаковый план по ресурсам и таймингам.']);if(q.aggression<60)arr.push(['Создавать давление','Ищи моменты, когда твой герой сильнее по уровню/ультимейту/предмету. Агрессия должна иметь конкретную причину.']);if(q.scaling<60)arr.push(['Играть вокруг power spike','Заранее назови следующий предмет/уровень, после которого меняется твоя задача, и планируй действие вокруг него.']);return arr.slice(0,4)}
+function saveSnapshot(s){const key='dpi_history_v6';let a=[];try{a=JSON.parse(localStorage.getItem(key)||'[]')}catch{};a.unshift(s);a=a.slice(0,12);localStorage.setItem(key,JSON.stringify(a));return a}
+function renderHistory(){let a=[];try{a=JSON.parse(localStorage.getItem('dpi_history_v6')||'[]')}catch{};if(!a.length){$('timeline').innerHTML='<div class="mut">Пока нет сохранённых анализов.</div>';return} $('timeline').innerHTML=a.map(x=>`<div class="snapshot"><b>${esc(x.name)}</b><p>${new Date(x.date).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p><strong>Index ${x.index}</strong><p>${esc(x.arch)} · ${x.games} игр</p></div>`).join('')}
+function renderShare(p,q,h){const text=`${p.profile?.personaname||'Dota Player'} · Player Index ${q.index}/100 · ${q.arch}\nRank: ${rankInfo(p.rank_tier).name}\nTop: ${q.top.map(k=>Math.round(q[k])).join(' / ')}\nMain focus: ${q.low.slice(0,2).join(', ')}`;$('shareText').textContent=text;$('copyBtn').onclick=()=>navigator.clipboard?.writeText(text);$('copyLinkBtn').onclick=()=>navigator.clipboard?.writeText(location.href.split('#')[0]+'#'+p.profile.account_id)}
+function renderRoleSwitch(active,m,rankTier){
+ const roles=[['1','Carry / Pos 1'],['2','Mid / Pos 2'],['3','Offlane / Pos 3'],['4','Support / Pos 4–5']];
+ const el=$('roleSwitch');el.classList.remove('hidden');el.innerHTML=roles.map(([id,n])=>`<button class="${Number(id)===active?'active':''}" data-role="${id}">${n}</button>`).join('');
+ el.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const rid=Number(btn.dataset.role);const filtered=m.filter(x=>Number(x.lane_role)===rid);if(filtered.length<5){$('roleBadge').innerHTML=`роль: <b>${btn.textContent}</b> · мало данных (${filtered.length} игр)`;return;}const q2=analyzeWithRole(filtered,rid);STATE.q=q2;renderRoleResult(q2,rankTier);renderRecommendedHeroes(STATE.heroStats,STATE.h,q2.role.id,rankTier,STATE.patchName);el.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));});
+}
+function analyzeWithRole(m,rid){const q=metricData(m);q.role={id:Number(rid),name:{1:'Carry / Safe lane',2:'Mid',3:'Offlane',4:'Support'}[Number(rid)]||'Hybrid'};q.selectedRole=true;const c=confidence(m.length),keys=Object.keys(AXIS_LABELS),weights=roleWeights(rid);let sum=0,ws=0;for(const k of keys){sum+=q[k]*weights[k];ws+=weights[k]}const base=sum/ws,index=Math.round(clamp(base*.92+q.kda*.08));const sorted=[...keys].sort((a,b)=>q[b]-q[a]),weak=[...keys].sort((a,b)=>q[a]-q[b]);let arch='Hybrid Player';if(rid===1&&q.farming>=72&&q.survival>=68&&q.scaling>=65)arch='Farming Carry';else if((rid===2||rid===3)&&q.aggression>=72&&q.teamfight>=65)arch='Tempo / Aggressive';else if(q.map>=68&&q.objectives>=65)arch='Map Controller';else if(q.teamfight>=73)arch='Teamfight Player';else if(q.survival>=78&&q.aggression<55)arch='Defensive Player';return {...q,index,arch,top:sorted.slice(0,3),low:weak.slice(0,4),confidence:c};}
+function renderRoleResult(q,rankTier){q.role=q.role&&q.role.id?{id:Number(q.role.id),name:q.role.name}:q.role;$('roleBadge').innerHTML=`роль: <b>${esc(q.role.name)}</b> · ${q.raw.n} матчей`;$('arch').textContent=q.arch;$('indexScore').textContent=q.index;$('ring').style.setProperty('--deg',q.index*3.6+'deg');$('indexSub').textContent=`Уверенность выборки: ${Math.round(q.confidence*100)}%. Роль: ${q.role.name}. Пересчёт выполнен только по матчам этой роли.`;$('mainInsight').textContent=insight(q);renderLossAnalysis(STATE?.m||[]);$('strengths').innerHTML=q.top.map(k=>`<div class="statline"><span>${AXIS_LABELS[k]}</span><b class="good">${Math.round(q[k])}</b></div>`).join('');$('weaknesses').innerHTML=q.low.slice(0,4).map(k=>`<div class="statline"><span>${AXIS_LABELS[k]}</span><b class="bad">${Math.round(q[k])}</b></div>`).join('');renderMetrics(q,rankTier);renderPotential(q,rankTier);}
+
+function renderLossAnalysis(m){
+ const wins=m.filter(isWin),losses=m.filter(x=>!isWin(x));
+ if(!wins.length||!losses.length){$('lossAnalysis').textContent='Недостаточно побед и поражений для сравнения.';return}
+ const avgSafe=(a,k)=>{const v=a.map(x=>Number(x[k])).filter(Number.isFinite);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null};
+ const rows=[];
+ const d=avgSafe(losses,'deaths'),dw=avgSafe(wins,'deaths'); if(d!=null&&dw!=null&&d-dw>=1)rows.push(`В поражениях ты умирал в среднем на ${(d-dw).toFixed(1)} раза чаще (${d.toFixed(1)} против ${dw.toFixed(1)}).`);
+ const g=avgSafe(losses,'gold_per_min'),gw=avgSafe(wins,'gold_per_min'); if(g!=null&&gw!=null&&gw-g>=50)rows.push(`В поражениях средний GPM ниже примерно на ${Math.round(gw-g)}.`);
+ const tf=avgSafe(losses,'teamfight_participation'),tfw=avgSafe(wins,'teamfight_participation'); if(tf!=null&&tfw!=null&&tfw-tf>=.08)rows.push(`В поражениях участие в командных драках ниже примерно на ${Math.round((tfw-tf)*100)} п.п.`);
+ const td=avgSafe(losses,'tower_damage'),tdw=avgSafe(wins,'tower_damage'); if(td!=null&&tdw!=null&&tdw-td>=800)rows.push(`В победах ты наносил примерно на ${Math.round(tdw-td)} больше урона по зданиям.`);
+ $('lossAnalysis').innerHTML=(rows.length?rows.slice(0,4):['Явного повторяющегося паттерна по доступным полям пока не видно. Для более глубокого разбора нужны полные данные каждого матча.']).map(x=>`<div class="statline"><span>${esc(x)}</span></div>`).join('');
+}
+
+function renderAll(p,m,h,hs,wl,patchName){const q=analyze(m), names=heroNameMap(hs), images=heroImageMap(hs);STATE={p,m,h,heroStats:hs,q,names,images,patchName:patchName||'Текущий патч'};const prof=p.profile||{};$('avatar').src=prof.avatarfull||prof.avatarmedium||prof.avatar||'';$('name').textContent=prof.personaname||'Dota Player';const rank=rankInfo(p.rank_tier),rn=rank.name,ri=rank.icon;$('rankName').textContent=rn;$('rankIcon').src=ri||'';$('rankIcon').alt=rn||'';$('meta').textContent=`Steam32 ${prof.account_id||'—'} · ${m.length} матчей · ${p.mmr_estimate?.estimate?`MMR estimate ${Math.round(p.mmr_estimate.estimate)}`:''}`;$('arch').textContent=q.arch;$('roleBadge').innerHTML=`авто-роль: <b>${esc(q.role.name)}</b>`; renderRoleSwitch(q.role.id,m,p.rank_tier);$('indexScore').textContent=q.index;$('ring').style.setProperty('--deg',q.index*3.6+'deg');$('indexTitle').textContent=q.index>=75?'Высокий общий профиль':q.index>=55?'Сильная база, есть рычаг роста':'Большой резерв для улучшения';$('indexSub').textContent=`Уверенность выборки: ${Math.round(q.confidence*100)}%. Роль: ${q.role.name}. Архетип определён по игровым данным, а не по психологическому тесту.`;$('mainInsight').textContent=insight(q);renderLossAnalysis(m);$('goal').textContent=`Цель на 20 игр: ${q.low.slice(0,2).map(k=>({farming:'фарм',mechanics:'механика',survival:'выживаемость',aggression:'агрессия',teamfight:'teamfight',map:'карта',objectives:'объекты',consistency:'стабильность',economy:'экономика',scaling:'скейлинг'}[k])).join(' + ')}.`;$('strengths').innerHTML=q.top.map(k=>`<div class="statline"><span>${AXIS_LABELS[k]}</span><b class="good">${Math.round(q[k])}</b></div>`).join('');$('weaknesses').innerHTML=q.low.slice(0,4).map(k=>`<div class="statline"><span>${AXIS_LABELS[k]}</span><b class="bad">${Math.round(q[k])}</b></div>`).join('');renderMetrics(q,p.rank_tier);renderPotential(q,p.rank_tier);
+ const last=m.slice(0,10);const wins=last.filter(isWin).length;$('wltext').textContent=`Последние 10: ${wins}W / ${10-wins}L`;$('results').innerHTML=last.slice().reverse().map(x=>{const w=isWin(x);return `<div class="b"><i style="height:${w?100:42}px;background:${w?'linear-gradient(180deg,#67d39a,#315e47)':'linear-gradient(180deg,#ef7777,#643b3b)'}"></i><span>${w?'W':'L'}</span></div>`}).join('');const recent=last;const rr={gpm:avg(recent,'gold_per_min'),xpm:avg(recent,'xp_per_min'),k:avg(recent,'kills'),d:avg(recent,'deaths'),a:avg(recent,'assists'),tf:avg(recent,'teamfight_participation')};$('formStats').innerHTML=[['K/D/A',`${(rr.k||0).toFixed(1)} / ${(rr.d||0).toFixed(1)} / ${(rr.a||0).toFixed(1)}`],['GPM',Math.round(rr.gpm||0)],['XPM',Math.round(rr.xpm||0)],['Teamfight',rr.tf!=null?pct(rr.tf*100):'—']].map(x=>`<div class="statline"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+ const ha=heroAnalysis(h).slice(0,6);$('heroCards').innerHTML=ha.map(x=>`<div class="heroCard"><img class="heroPortrait" src="${images[x.hero_id]||''}" onerror="this.style.visibility='hidden'" alt=""><div class="heroBody"><div class="heroTop"><b>${esc(names[x.hero_id]||('Hero '+x.hero_id))}</b><span class="tag">${x.games} games</span></div><p>${x.wr.toFixed(1)}% winrate · ${x.games-x.wins} losses · confidence ${x.confidence}</p></div></div>`).join('');
+ $('matchRows').innerHTML=m.slice(0,30).map(x=>{const w=isWin(x);const hn=esc(names[x.hero_id]||('Hero '+x.hero_id));return `<tr><td class="${w?'resultW':'resultL'}">${w?'WIN':'LOSS'}</td><td><img class="minihero" src="${images[x.hero_id]||''}" onerror="this.style.visibility='hidden'" alt="">${hn}</td><td>${x.kills??0}/${x.deaths??0}/${x.assists??0}</td><td>${x.gold_per_min??'—'}</td><td>${x.xp_per_min??'—'}</td><td>${x.last_hits??'—'}</td><td>${x.hero_damage??'—'}</td><td>${formatMin(x.duration)}</td></tr>`}).join('');
+ const recs=recommendations(q);$('recs').innerHTML=recs.map((r,i)=>`<div class="rec"><div class="num">${i+1}</div><div><b>${r[0]}</b><p>${r[1]}</p></div></div>`).join('');$('mission').innerHTML=`<p>Играй следующие 20 матчей не ради максимального KDA, а ради одной повторяемой привычки. ${recs[0]?.[0]||'Сохраняй стабильность'}.</p><p>После каждой игры зафиксируй один момент: <b>что сделал правильно</b>, <b>где потерял темп</b>, <b>какое решение повторю в следующей</b>.</p>`;$('missionGoal').textContent='Главный критерий прогресса — изменение показателя, который сейчас сильнее всего ограничивает твой профиль.';renderHistory();renderShare(p,q,h);
+ const snap={date:Date.now(),name:prof.personaname||'Dota Player',index:q.index,arch:q.arch,games:m.length};saveSnapshot(snap);renderHistory();}
+async function run(){try{$('status').classList.remove('hidden');$('status').textContent='Загружаю профиль, матчи, героев и benchmark…';$('status').classList.remove('error');$('dash').style.display='none';const id=idOf($('steamInput').value);STATE={patchName:'Текущая статистика OpenDota'};const [p,m,h,hs,wl,patches]=await Promise.all([get(`/players/${id}`),get(`/players/${id}/matches?limit=100`),get(`/players/${id}/heroes?limit=30`),get('/heroStats'),get(`/players/${id}/wl?limit=100`),get('/constants/patches').catch(()=>null)]);if(!p.profile)throw Error('Профиль не найден или скрыт.');if(!m.length)throw Error('Матчи не найдены. Проверь публичность истории матчей Dota 2.');let patchName='Текущий патч';if(patches&&typeof patches==='object'){const arr=Object.entries(patches).map(([id,x])=>({id:Number(id),name:x?.name||x?.patch||''})).filter(x=>Number.isFinite(x.id)&&x.name).sort((a,b)=>b.id-a.id);if(arr[0])patchName=arr[0].name;}STATE.patchName=patchName;renderAll(p,m,h,hs,wl,patchName);const role=STATE.q?.role||dominantRole(m);renderRecommendedHeroes(hs,h,role.id,p.rank_tier,patchName,'meta');const topHeroIds=heroAnalysis(h).slice(0,6).map(x=>x.hero_id);await loadRealHeroBenchmarks(topHeroIds,h);$('status').classList.add('hidden');$('dash').style.display='block';location.hash=id}catch(e){$('status').textContent='Ошибка: '+e.message;$('status').classList.add('error');$('dash').style.display='none'}}
+$('analyze').onclick=run;$('steamInput').addEventListener('keydown',e=>{if(e.key==='Enter')run()});document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:'smooth',block:'start'}));
+if(location.hash&&/^#\d+$/.test(location.hash)){$('steamInput').value=location.hash.slice(1)}
+</script></body></html>
