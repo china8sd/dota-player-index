@@ -1,8 +1,6 @@
-Dota Player Index V9
+Dota Player Index V19.1
 
-Changes:
-- Fixed manual role selection so the selected role is retained by all 10 axes.
-- Simplified the 10 axes explanations for players.
-- Added Meta / My heroes toggle in the current-patch hero recommendations.
-- Meta mode includes heroes the player has never played, using OpenDota heroStats by role/rank.
-- Preserved real OpenDota hero benchmark data and previous features.
+One-file OpenDota browser analytics.
+Upload index.html and the assets folder to GitHub Pages.
+
+V19.1 fix: explanation modal is now mounted before JavaScript bindings, so the close button, backdrop click and Escape key work correctly.
