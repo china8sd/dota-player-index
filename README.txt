@@ -1,6 +1,15 @@
-Dota Player Index V19.1
+Dota Player Index V4.17 Speed
 
-One-file OpenDota browser analytics.
-Upload index.html and the assets folder to GitHub Pages.
+Основа: V4.16.
 
-V19.1 fix: explanation modal is now mounted before JavaScript bindings, so the close button, backdrop click and Escape key work correctly.
+Изменения:
+- ускорена загрузка последних 50 матчей: до 8 запросов одновременно;
+- короткая пауза 150 мс между пакетами вместо 1100 мс;
+- отдельный sessionStorage-кэш V4.17 для повторного открытия профиля;
+- сравнение второго игрока также ускорено;
+- сохранена методика определения роли V4.16 по последним 50 ranked-играм;
+- прозрачные PNG иконки рангов сохранены.
+
+Если OpenDota отвечает медленно или временно ограничивает запросы, встроенные retry/backoff продолжают работать.
+
+V4.19: compare optimized (10-match batches, short pacing), robust rank fallback, triangle top spacing fix.
