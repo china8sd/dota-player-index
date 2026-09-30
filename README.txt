@@ -1,15 +1,11 @@
-Dota Player Index V4.17 Speed
+Dota Player Index V4.21 — Modular build
 
-Основа: V4.16.
+Base: V4.21 role compare fix.
+Architecture only: CSS and JS extracted from the original index.html.
+No analytics logic, OpenDota logic, role logic, compare logic, assets, or visual design intentionally changed.
 
-Изменения:
-- ускорена загрузка последних 50 матчей: до 8 запросов одновременно;
-- короткая пауза 150 мс между пакетами вместо 1100 мс;
-- отдельный sessionStorage-кэш V4.17 для повторного открытия профиля;
-- сравнение второго игрока также ускорено;
-- сохранена методика определения роли V4.16 по последним 50 ranked-играм;
-- прозрачные PNG иконки рангов сохранены.
-
-Если OpenDota отвечает медленно или временно ограничивает запросы, встроенные retry/backoff продолжают работать.
-
-V4.19: compare optimized (10-match batches, short pacing), robust rank fallback, triangle top spacing fix.
+Files:
+- index.html — page structure
+- css/style.css — original embedded CSS
+- js/app.js — original embedded JavaScript
+- assets/ — original assets
