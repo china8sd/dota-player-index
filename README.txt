@@ -9,3 +9,11 @@ Files:
 - css/style.css — original embedded CSS
 - js/app.js — original embedded JavaScript
 - assets/ — original assets
+
+Shareable player links:
+- Open https://china8sd.github.io/dota-player-index/{steamID} to start analysis automatically.
+- Both numeric OpenDota account IDs and SteamID64 are supported, with an optional trailing slash.
+- After a successful analysis, copy the browser address to share the player with friends.
+- GitHub Pages uses 404.html to redirect player paths to the app; keep this file when deploying.
+- For local hosting, serve the project at /dota-player-index/ and use 404.html as the fallback.
+- Run the routing checks with: node tests/player-links.test.cjs

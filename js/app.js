@@ -770,7 +770,13 @@ $('#load').onclick=async()=>{
   if(!id){$('#app').innerHTML='<div class="card section"><h2>Не удалось найти Steam ID</h2><p>Вставь числовой Steam ID или ссылку вида steamcommunity.com/profiles/...</p></div>';return}
   $('#load').disabled=true;$('#load').textContent='Анализирую…';
   $('#app').innerHTML=loadingMarkup('Dota Player Index загружает ваш профиль…','Получаем профиль и историю матчей.');
-  try{await loadProfile(id)}catch(e){const msg=String(e?.message||e); const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg); $('#app').innerHTML=`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`}
+  try{
+    await loadProfile(id);
+    const url=new URL(window.location.href);
+    url.pathname=new URL(document.baseURI).pathname+id;
+    url.searchParams.delete('steamID');
+    window.history.replaceState(null,'',url);
+  }catch(e){const msg=String(e?.message||e); const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg); $('#app').innerHTML=`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`}
   finally{$('#load').disabled=false;$('#load').textContent='Анализировать'}
 };
 $('#steam').addEventListener('keydown',e=>{
@@ -968,3 +974,10 @@ async function runCompare(myIndex,myName){
 
 function closeModal(){$('#modal').classList.remove('open');$('#modal').querySelector('.modalBox')?.classList.remove('wide')}
 $('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+
+// GitHub Pages redirects player paths through 404.html to this query parameter.
+const linkedSteamId=new URL(window.location.href).searchParams.get('steamID');
+if(linkedSteamId && /^\d+$/.test(linkedSteamId)){
+  $('#steam').value=linkedSteamId;
+  $('#load').click();
+}

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Игрок — Dota Player Index</title>
+</head>
+<body>
+<p>Страница не найдена. <a href="/dota-player-index/">Открыть Dota Player Index</a></p>
+<script>
+  const playerPath=window.location.pathname.match(/^\/dota-player-index\/(\d+)\/?$/);
+  if(playerPath){
+    const url=new URL(window.location.href);
+    url.pathname='/dota-player-index/';
+    url.searchParams.set('steamID',playerPath[1]);
+    window.location.replace(url);
+  }
+</script>
+</body>
+</html>
