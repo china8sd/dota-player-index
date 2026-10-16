@@ -770,7 +770,17 @@ $('#load').onclick=async()=>{
   if(!id){$('#app').innerHTML='<div class="card section"><h2>Не удалось найти Steam ID</h2><p>Вставь числовой Steam ID или ссылку вида steamcommunity.com/profiles/...</p></div>';return}
   $('#load').disabled=true;$('#load').textContent='Анализирую…';
   $('#app').innerHTML=loadingMarkup('Dota Player Index загружает ваш профиль…','Получаем профиль и историю матчей.');
-  try{await loadProfile(id)}catch(e){const msg=String(e?.message||e); const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg); $('#app').innerHTML=`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`}
+  try {
+    await loadProfile(id)
+  }
+    catch(e){
+      const msg=String(e?.message||e);
+      const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg);
+      const noMatches=/не вернул ranked/i.test(msg);
+      $('#app').innerHTML=noMatches
+        ?`<div class="card section"><h2>Матчи не найдены</h2><p>${esc(msg)}.</p><p class="notice">Возможные причины:<br>• у игрока скрыта история матчей (Настройки → Сообщество → Показывать данные матчей);<br>• игрок не играл в ranked.</p></div>`
+        :`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`
+  }
   finally{$('#load').disabled=false;$('#load').textContent='Анализировать'}
 };
 $('#steam').addEventListener('keydown',e=>{
