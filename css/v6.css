@@ -1,0 +1,21 @@
+/* 6.0: карточка игрока, лента, сворачиваемые разделы, нижняя навигация */
+.pcard{--tc:#d8b26a;position:relative;margin:0 0 14px;padding:22px;border-radius:26px;border:2px solid var(--tc);background:radial-gradient(circle at 100% 0,color-mix(in srgb,var(--tc) 22%,transparent),transparent 55%),linear-gradient(160deg,#171d28,#0d1118);box-shadow:0 0 50px color-mix(in srgb,var(--tc) 18%,transparent)}
+.pcTop{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.pcTop img{width:72px;height:72px;border-radius:50%;border:3px solid var(--tc);object-fit:cover}
+.pcWho b{display:block;font:800 30px/1 var(--display)}.pcWho span{color:var(--muted);font-size:15px}
+.pcIdx{font:800 clamp(64px,15vw,96px)/.9 var(--display);color:var(--tc);text-align:right}.pcIdx small{display:block;font:500 14px Archivo,sans-serif;color:var(--muted)}
+.pcAxes{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;margin-top:18px}
+.pcAxes div{display:grid;grid-template-columns:96px 1fr 26px;gap:8px;align-items:center;font-size:14px}
+.pcAxes span{color:#c9d0db}.pcAxes em{font-style:normal;font-weight:700;text-align:right}
+.pcAxes i{height:7px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden}.pcAxes u{display:block;height:100%;background:var(--tc);border-radius:9px}
+.pcNote{margin-top:14px;color:var(--muted);font-size:13px}.pcBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pcFeed{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}.pcFeed .card{padding:20px}
+.pcFeed h3{margin:0 0 8px;font:700 22px var(--display)}.pcToday{border-color:rgba(98,214,164,.45)}.pcToday b{font-size:18px}
+.pcFeed p{margin:6px 0;color:#c9d0db}.pcTrend svg{width:100%;height:auto;display:block}
+.section>h2{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.section>h2::after{content:"−";font:600 24px Archivo,sans-serif;color:var(--muted)}
+.section.col>h2::after{content:"+"}.section.col>*:not(h2){display:none}.section.col>h2{margin-bottom:0}
+@media(max-width:900px){.pcFeed{grid-template-columns:1fr}}
+@media(max-width:600px){.pcAxes{grid-template-columns:1fr}.pcTop{grid-template-columns:auto 1fr}.pcIdx{grid-column:1/-1;text-align:left}.pcBtns .btn{flex:1 1 100%}}
+@media(max-width:700px){#app{padding-bottom:76px}
+ .dpiNav{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(11,14,19,.96);border-top:1px solid var(--line);z-index:30}}

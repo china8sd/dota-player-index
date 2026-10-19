@@ -1,0 +1,81 @@
+/* 8.0 «Афиша»: плоские блоки, прямые углы, Radiant/Dire по диагонали, карточка коллекционера */
+:root{--bg:#0F1115;--card:#161A21;--line:rgba(230,233,236,.16);--text:#E6E9EC;--muted:#97A0AB;--green:#1F9D6A;--red:#D8453A;--gold:#F2C230}
+body:before{background:linear-gradient(115deg,rgba(31,157,106,.17) 0 34%,transparent 34% 66%,rgba(216,69,58,.17) 66%);filter:none}
+body:after{display:none}
+.card,.section,.search,.stat,.metric,.v4heroPill,.v4indexStat,.modalBox,.g5panel,.g5upgradeCard,.g5finalPanel,.v4insightCard,.dpiVerdict,.landingPoints li{border-radius:3px;box-shadow:none}
+.card{background:var(--card)}
+.btn{border-radius:3px;background:var(--gold);color:#111;font-weight:700}.btn:hover{filter:none;background:#ffd84d}
+.btn.secondary{background:transparent;border:1.5px solid var(--text);color:var(--text)}
+.section>h2{font-size:clamp(30px,5vw,42px);font-weight:800;line-height:1;border-left:7px solid var(--gold);padding-left:12px;margin-bottom:14px}
+.v4main h2{font-size:22px}
+/* афишный лендинг */
+.landingBox{text-align:left;max-width:860px}
+.landingBox h1{font-size:clamp(56px,13vw,132px);line-height:.88;font-weight:900;text-transform:uppercase;letter-spacing:0}
+.landingBox p{margin-left:0}.landingPoints{justify-content:flex-start}.landingPoints li{border-radius:0;border-color:var(--text);color:var(--text)}
+.landingKicker{color:var(--gold);letter-spacing:.14em}
+.search{border:2px solid var(--text);background:var(--bg);padding:6px;backdrop-filter:none}.search:focus-within{border-color:var(--gold);box-shadow:none}
+/* вкладки вместо пилюль */
+.dpiNav{gap:2px;background:var(--bg);border-bottom:1px solid var(--line)}
+.dpiNav button{border-radius:0;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted)}
+.dpiNav button.on{background:none;color:var(--text);border-bottom-color:var(--gold)}
+.dpiVerdict{border:0;border-left:8px solid var(--gold);background:var(--card)}
+.dpiTierName{font-size:40px;font-weight:900;color:var(--text)}
+.dpiBar{border-radius:0;height:10px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 2px,transparent 2px 10%)}.dpiBar i{border-radius:0;background:var(--gold)}
+/* старый блок индекса без кольца: просто гигантская цифра */
+.v4index{background:var(--card);border-color:var(--line)}
+.indexRing{width:auto;height:auto;margin:0;border-radius:0;background:none!important;box-shadow:none}
+.indexRing::before,.indexRing::after{display:none}
+.index{font-size:clamp(88px,22vw,150px);font-weight:900;line-height:.85}
+/* карточка коллекционера */
+.pcard{border:0;border-radius:6px;padding:30px 26px;isolation:isolate;box-shadow:none;background:linear-gradient(135deg,var(--tc),color-mix(in srgb,var(--tc) 35%,#fff) 30%,var(--tc) 55%,color-mix(in srgb,var(--tc) 55%,#000) 100%)}
+.pcard::before{content:"";position:absolute;inset:6px;border-radius:3px;background:#12161C;z-index:-1}
+.pcIdx{font-size:clamp(92px,24vw,160px);font-weight:900}
+.pcTop img{border-radius:3px;border-width:2px}
+.pcAxes i,.pcAxes u{border-radius:0}.pcAxes i{height:9px}
+.pcSerial{position:absolute;top:14px;right:20px;font:700 13px var(--display);letter-spacing:.14em;color:var(--muted)}
+.pcStamp{position:absolute;right:22px;bottom:70px;transform:rotate(-8deg);padding:2px 10px;border:2px solid var(--tc);color:var(--tc);font:800 16px var(--display);letter-spacing:.08em;opacity:.85;pointer-events:none}
+.pcRuler{position:relative;height:36px;margin-top:20px;border-bottom:2px solid var(--text);background:repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 5%) bottom/100% 8px no-repeat}
+.pcRuler span{position:absolute;top:0;transform:translateX(-50%);font-size:11px;color:var(--muted)}
+.pcRuler b{position:absolute;bottom:0;width:5px;height:32px;background:var(--tc);transform:translateX(-50%)}
+.pcFeed .card{border-left:4px solid var(--text)}.pcToday{border-left-color:var(--green)!important}
+.duel td{font-weight:800}.pcSelf select{border-radius:0}
+.dpiTools button{border-radius:3px}
+.dpiToast{border-radius:3px;background:var(--gold)}
+/* светлая тема — равноправная */
+html[data-theme=light]{--bg:#ECEEF0;--card:#FFFFFF;--line:rgba(15,17,21,.2);--text:#0F1115;--muted:#555E6A;--gold:#D9A800}
+html[data-theme=light] body:before{background:linear-gradient(115deg,rgba(31,157,106,.14) 0 34%,transparent 34% 66%,rgba(216,69,58,.14) 66%);filter:none}
+html[data-theme=light] .pcard::before{background:#fff}
+html[data-theme=light] .dpiNav,html[data-theme=light] .search{background:var(--bg)}
+html[data-theme=light] .dpiTierName,html[data-theme=light] .v4dna{color:var(--text)}
+@media(max-width:600px){.pcStamp{bottom:auto;top:44px;right:16px}}
+/* 8.1: арт-фон. Лендинг: лёгкое размытие. Профиль: сильнее размыт и затемнён */
+body:before{inset:-40px;background:linear-gradient(180deg,rgba(11,14,19,.32),rgba(11,14,19,.74)),linear-gradient(115deg,rgba(31,157,106,.12) 0 34%,transparent 34% 66%,rgba(216,69,58,.12) 66%),url("../assets/bg-main.webp") center/cover no-repeat;filter:blur(3px) saturate(.95);transition:filter .6s ease}
+body.results:before{filter:blur(16px) saturate(.8)}
+body.results:after{display:block;content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:rgba(11,14,19,.55)}
+html[data-theme=light] body:before{background:linear-gradient(180deg,rgba(236,238,240,.62),rgba(236,238,240,.9)),url("../assets/bg-main.webp") center/cover no-repeat}
+html[data-theme=light] body.results:after{background:rgba(236,238,240,.5)}
+.landingBox h1,.landingBox p{text-shadow:0 2px 18px rgba(0,0,0,.55)}
+html[data-theme=light] .landingBox h1,html[data-theme=light] .landingBox p{text-shadow:none}
+/* 8.2: главная */
+.landing{min-height:70vh;display:grid;gap:36px;align-items:center;place-items:center stretch}
+@media(min-width:960px){.landing{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}}
+.landingBox h1{font-size:clamp(68px,17vw,150px);line-height:.84;font-weight:900;margin:0 0 14px}
+.landingBox h1 span{display:block}
+.landingTag{font:600 20px var(--display);letter-spacing:.04em;border-left:7px solid var(--gold);padding-left:12px;margin-bottom:18px}
+.landingBox p{font-size:17px;max-width:520px;margin:0 0 20px}
+.landingRecent{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.landingRecent button{min-height:38px;padding:0 12px;border:1.5px solid var(--text);border-radius:3px;background:rgba(15,17,21,.6);color:var(--text);font:600 14px Archivo,sans-serif;cursor:pointer}
+.landingRecent button b{color:var(--gold);margin-left:6px}
+.landingHelp{margin-top:12px;color:var(--muted);font-size:14px}.landingHelp summary{cursor:pointer;color:var(--text)}.landingHelp p{margin:8px 0 0;font-size:14px}
+.landingSteps{list-style:none;counter-reset:s;display:flex;flex-wrap:wrap;gap:10px 22px;padding:0;margin:20px 0 6px}
+.landingSteps li{counter-increment:s;font-weight:600;font-size:15px}
+.landingSteps li::before{content:counter(s);display:inline-grid;place-items:center;width:26px;height:26px;margin-right:8px;background:var(--gold);color:#111;font:800 15px var(--display)}
+.landingSample{position:relative;width:100%;max-width:430px;justify-self:center;transform:rotate(2.5deg)}
+.landingSample.pcard{padding:26px 22px}
+@media(max-width:959px){.landingSample{transform:none;max-width:520px;justify-self:start}}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+/* 8.4: Telegram над примером карточки */
+.landingSide{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;max-width:430px;justify-self:center}
+.landingSide .telegramCard{margin:0;border-radius:3px}
+.landingSide .landingTelegram{margin:0 0 12px;font:600 15px Archivo,sans-serif;letter-spacing:0;text-transform:none;color:var(--text);pointer-events:auto}
+@media(max-width:959px){.landingSide{justify-self:start;max-width:520px}}

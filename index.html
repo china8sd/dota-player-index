@@ -3,39 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dota Player Index 4.21 · Modular</title>
+<title>Dota Player Index 12.1</title>
+<meta name="description" content="Разбор профиля Dota 2: Player Index, роль, стиль игры и план на ближайшие игры.">
+<meta name="theme-color" content="#0b0e13">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Archivo:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/light.css">
+<link rel="stylesheet" href="css/v6.css">
+<link rel="stylesheet" href="css/v7.css">
+<link rel="stylesheet" href="css/v8.css">
+<link rel="stylesheet" href="css/train.css">
+<link rel="stylesheet" href="css/v12.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta property="og:type" content="website"><meta property="og:title" content="Dota Player Index — разбор твоей игры"><meta property="og:description" content="Player Index, роль, стиль игры и план на ближайшие 10 игр.">
+<!-- для превью в Telegram добавь: <meta property="og:image" content="https://ТВОЙ-ДОМЕН/assets/icon-512.png"> -->
 </head>
 <body>
 <div class="wrap">
 <header class="top">
-  <div class="brand">DOTA PLAYER INDEX <small>VERSION 4.11 · PERSONAL GAME ANALYTICS</small></div>
+  <div class="brand">DOTA PLAYER INDEX <small>VERSION 12.1 · PERSONAL GAME ANALYTICS</small></div>
   
 </header>
 
 <div class="landing" id="landing">
   <div class="landingBox">
-    <div class="landingKicker">DOTA PLAYER INDEX</div>
-    <h1>Разбор твоей игры в Dota 2</h1>
+    <h1><span>Dota</span><span>Player</span><span>Index</span></h1>
+    <div class="landingTag">Разбор твоей игры в Dota 2</div>
     <p>Вставь Steam ID или ссылку на профиль — сервис покажет реальные показатели, игровой стиль и точки роста.</p>
     <div class="search">
       <input id="steam" placeholder="Steam ID или ссылка на профиль Steam" value="">
       <button class="btn" id="load">Анализировать</button>
     </div>
-    <a class="telegramCard" href="https://t.me/chinasd787" target="_blank" rel="noopener" aria-label="Telegram создателя">
-      <img src="assets/telegram-creator.png" alt="Телеграм создателя">
-    </a>
-    <div class="landingTelegram">Автор проекта · Telegram</div>
+    <div class="landingRecent" id="recent"></div>
+    <details class="landingHelp"><summary>Где взять Steam ID?</summary><p>Открой свой профиль в Steam и скопируй адрес страницы вида steamcommunity.com/profiles/число — или вставь само число. Если в адресе имя вместо цифр (/id/имя), найди числовой ID на steamid.io.</p></details>
+    <ol class="landingSteps"><li>Вставь ссылку</li><li>Разберём 50 игр</li><li>Получи карточку и план</li></ol>
+  </div>
+  <div class="landingSide">
+    <a class="telegramCard" href="https://t.me/chinasd787" target="_blank" rel="noopener" aria-label="Telegram создателя"><img src="assets/telegram-creator.png" alt="Телеграм создателя"></a>
+    <div class="landingTelegram">Поддержать проект можно подпиской на Telegram</div>
+    <aside class="landingSample" id="sample" aria-hidden="true"></aside>
   </div>
 </div>
 
 <div id="app"></div>
 
-<footer>Dota Player Index 4.8 · данные OpenDota · анализ рассчитывается в браузере</footer>
+<footer>Dota Player Index 12.1 · данные OpenDota · анализ рассчитывается в браузере</footer>
 </div>
 
 <div class="modal" id="modal"><div class="modalBox"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div>
 
 <script src="js/app.js"></script>
+<script src="js/enhance.js"></script>
+<script src="js/v6.js"></script>
+<script src="js/v7.js"></script>
+<script src="js/v8.js"></script>
+<script src="js/train.js"></script>
+<script src="js/v10.js"></script>
+<script src="js/v12.js"></script>
 </body>
 </html>

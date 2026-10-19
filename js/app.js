@@ -1,4 +1,5 @@
 const API='https://api.opendota.com/api';
+let DPI_ROLE=0; // роль текущего профиля: пороги индекса зависят от неё
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const n=(x,d=0)=>Number.isFinite(Number(x))?Number(x):d;
@@ -40,7 +41,7 @@ function readApiCache(path){
 }
 function writeApiCache(path,v){
   const x={t:Date.now(),v}; DPI_MEM_CACHE.set(path,{t:x.t,v});
-  try{sessionStorage.setItem(cacheKey(path),JSON.stringify(x))}catch(e){}
+  if(!path.startsWith('/matches/')){try{sessionStorage.setItem(cacheKey(path),JSON.stringify(x))}catch(e){}}
 }
 async function get(path, attempt=0, opts={}){
   const useCache=opts.cache!==false;
@@ -99,9 +100,9 @@ function roleInfoFrom(ms){
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const finite=v=>Number.isFinite(Number(v))?Number(v):0;
   const teamRank=(m,key)=>{
-    const v=finite(m?.[key]);
-    const r=finite(m?.['_teamRank_'+key]);
-    return r>0?r:.5;
+    const raw=m?.['_teamRank_'+key];
+    const r=Number(raw);
+    return (raw!=null&&Number.isFinite(r))?clamp(r):.5;
   };
 
   const classify=(m)=>{
@@ -157,17 +158,18 @@ function roleInfoFrom(ms){
   const rows=valid.map(classify);
   rows.forEach(r=>{if(r.role)counts[r.role]++});
   const total=valid.length;
+  const parsedShare=valid.filter(m=>m&&m.lane_role!=null).length/Math.max(1,valid.length);
   const sorted=keys.slice().sort((a,b)=>counts[b]-counts[a]||a-b);
   const top=sorted[0], second=sorted[1];
   const gap=counts[top]-counts[second];
   const close=counts[second]>=Math.max(5,Math.round(total*.20)) && gap<=Math.max(3,Math.round(total*.12));
   const secondary=close?labels[second]:'';
   const topRatio=counts[top]/Math.max(1,total);
-  const confidence=Math.max(0,Math.min(96,Math.round(52+topRatio*35+(gap/Math.max(1,total))*20-(secondary?12:0))));
+  const confidence=Math.max(0,Math.min(96,Math.round(52+topRatio*35+(gap/Math.max(1,total))*20-(secondary?12:0)-Math.round((1-parsedShare)*18))));
   const confidenceLabel=confidence>=78?'высокая':confidence>=62?'средняя':'низкая';
   const rawScores={}; keys.forEach(k=>rawScores[k]=counts[k]);
 
-  return {primary:labels[top],secondary,counts,laneCounts,sorted,total,confidence,confidenceLabel,rawScores};
+  return {primary:labels[top],secondary,counts,laneCounts,sorted,total,confidence,confidenceLabel,rawScores,parsedShare};
 }
 function roleKeyFrom(ms){
   const info=roleInfoFrom(ms);
@@ -183,7 +185,7 @@ function roleBreakdownHtml(ms){
   const info=roleInfoFrom(ms);
   if(!info.total)return '';
   const icon=roleAsset(info.primary);
-  return `<div class="roleMain"><div class="roleMainText">${icon?`<img class="roleMainIcon" src="assets/${icon}" alt="">`:''}<b>${esc(info.primary)}</b></div><button class="roleOtherBtn" onclick="openRoleList()">Остальные роли</button></div><div class="sub roleConfidence">Определение: ${esc(info.confidenceLabel)} · ${Math.round(info.confidence)}%</div>`;
+  return `<div class="roleMain"><div class="roleMainText">${icon?`<img class="roleMainIcon" src="assets/${icon}" alt="">`:''}<b>${esc(info.primary)}</b></div><button class="roleOtherBtn" onclick="openRoleList()">Остальные роли</button></div><div class="sub roleConfidence">Определение: ${esc(info.confidenceLabel)} · ${Math.round(info.confidence)}%${info.parsedShare<.7?` · разобрано матчей ${Math.round(info.parsedShare*100)}%`:''}</div>`;
 }
 function confidence(count){
   if(count<1)return ['нет данных',''];
@@ -208,13 +210,21 @@ function calc(ms){
   const clamp=v=>Math.max(0,Math.min(100,Number.isFinite(v)?v:50));
   const score=(value,low,high)=>Number.isFinite(value)?clamp((value-low)/(high-low)*100):null;
   const mix=(parts)=>{const a=parts.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
-  const farm=mix([score(gpm,300,700),score(lhmin,2,8),score(xpm,300,700)]);
-  const fight=mix([score(hdm,150,650),score(ka,2,12),score(tf,0.20,0.70)]);
+  const T={def:{gpm:[300,700],lh:[2,8],xpm:[300,700],hd:[150,650],ka:[2,12],tdm:[0,180]},
+    1:{gpm:[350,750],lh:[3,8.5],xpm:[350,750],hd:[200,700],ka:[2,12],tdm:[0,200]},
+    2:{gpm:[350,750],lh:[3,8],xpm:[400,800],hd:[200,700],ka:[3,14],tdm:[0,150]},
+    3:{gpm:[300,600],lh:[2,6],xpm:[320,650],hd:[150,600],ka:[3,14],tdm:[0,200]},
+    4:{gpm:[250,480],lh:[.5,4],xpm:[330,650],hd:[80,400],ka:[5,20],tdm:[0,80]},
+    5:{gpm:[200,400],lh:[.3,3],xpm:[280,560],hd:[60,300],ka:[5,20],tdm:[0,60]}}[DPI_ROLE]||{gpm:[300,700],lh:[2,8],xpm:[300,700],hd:[150,650],ka:[2,12],tdm:[0,180]};
+  const gpmSd=stdev(ms.map(x=>Number(x?.gold_per_min))), gpmCv=(Number.isFinite(gpmSd)&&gpm>0)?gpmSd/gpm:null;
+  const farm=mix([score(gpm,...T.gpm),score(lhmin,...T.lh)]);
+  const fight=mix([score(hdm,...T.hd),score(ka,...T.ka)]);
   const survival=score(deaths,10,2);
-  const map=mix([score(xpm,300,700),score(lhmin,2,8)]);
-  const objectives=score(tdm,0,180);
-  const tempo=mix([score(gpm,300,700),score(ka,2,12),score(tf,0.20,0.70)]);
-  const consistency=mix([score(wr,35,65),score(deathStd,4,1)]);
+  const map=mix([score(xpm,...T.xpm),score(tf,0.20,0.70)]);
+  const objectives=score(tdm,...T.tdm);
+  const tempo=mix([score(gpm,...T.gpm),score(ka,...T.ka)]);
+  // Стабильность: разброс смертей и GPM от игры к игре (WR сюда больше не входит — он шумный).
+  const consistency=mix([score(deathStd,4,1),score(gpmCv,.35,.12)]);
   const axes={farm,fight,survival,map,objectives,tempo,consistency};
   const axisValues=Object.values(axes).filter(Number.isFinite);
   // Never turn missing data into a fake zero. If some zones are unavailable, average the zones we actually have.
@@ -369,7 +379,7 @@ function lossProblemCard(ms){
   const a=lossAnalysis(ms), drivers=a.drivers||[];
   const wins=a.wins||[], losses=a.losses||[];
   const allSignals=(a.rows||[]).filter(r=>Number.isFinite(r[1])&&Number.isFinite(r[2])).map(r=>{
-    const d=r[1]-r[2], bad=r[0]==='Deaths'?d>0:d<0;
+    const d=r[1]-r[2], bad=r[0]==='Deaths'?d<0:d>0;
     const gap=Math.abs(d)/Math.max(Math.abs(r[1]),Math.abs(r[2]),1);
     const winVals=wins.map(m=>r[0]==='GPM'?n(m.gold_per_min):r[0]==='XPM'?n(m.xp_per_min):r[0]==='Hero Damage/min'?rate([m],'hero_damage'):r[0]==='Tower Damage/min'?rate([m],'tower_damage'):r[0]==='K+A'?(n(m.kills)+n(m.assists)):r[0]==='Teamfight'?n(m.teamfight_participation):n(m.deaths)).filter(Number.isFinite);
     const lossVals=losses.map(m=>r[0]==='GPM'?n(m.gold_per_min):r[0]==='XPM'?n(m.xp_per_min):r[0]==='Hero Damage/min'?rate([m],'hero_damage'):r[0]==='Tower Damage/min'?rate([m],'tower_damage'):r[0]==='K+A'?(n(m.kills)+n(m.assists)):r[0]==='Teamfight'?n(m.teamfight_participation):n(m.deaths)).filter(Number.isFinite);
@@ -539,6 +549,7 @@ function analyticsUpgrade(c,ms,rc,pc,role,lossProb){
 }
 
 function render(ms,p,heroes){
+  DPI_ROLE=roleKeyFrom(ms);
   const c=calc(ms), role=roleFrom(ms), roleInfo=roleInfoFrom(ms), d=dna(c,role), conf=confidence(c.games), prob=mainProblem(c), lossProb=lossProblemCard(ms), stageInfo=stageSignal(ms);
   const profile=p?.profile||p||{};
   const rank=rankLabel(p?.rank_tier);
@@ -604,7 +615,7 @@ function render(ms,p,heroes){
         <div class="v4indexStat"><div class="metricRoundIcon"><img class="metricIconImg" src="assets/icon-hero.png" alt=""></div><b>${fmt(c.hdm,0)}</b><span>Hero Damage / min</span></div>
         <div class="v4indexStat"><div class="metricRoundIcon"><div class="metricEmoji">⚔</div></div><b>${fmt(c.kda,1)}</b><span>K+A · убийства + ассисты</span></div>
       </div>
-      <div class="v4progress"><div class="v4progressHead"><span>ДИНАМИКА ЗА ПОСЛЕДНИЕ 20 ИГР</span><b>${Number.isFinite(idxDelta)?(idxDelta>=0?'+':'')+idxDelta:'—'}</b></div><div class="v4miniTrack"><i style="width:${Math.max(3,Math.min(100,(rc.index||50)/10))}%"></i></div></div><img class="v4compareImageBtn" src="assets/compare-player.png" alt="Сравнить с игроком" role="button" tabindex="0" onclick="openCompare()" onkeydown="if(event.key==='Enter'||event.key===' ')openCompare()">
+      <div class="v4progress"><div class="v4progressHead"><span>ДИНАМИКА ЗА ПОСЛЕДНИЕ 20 ИГР</span><b>${Number.isFinite(idxDelta)?(idxDelta>=0?'+':'')+idxDelta:'—'}</b></div><div class="v4miniTrack"><i style="width:${Math.max(3,Math.min(100,(rc.index||50)/10))}%"></i></div></div><img class="v4compareImageBtn" src="assets/compare-player.webp" alt="Сравнить с игроком" role="button" tabindex="0" onclick="openCompare()" onkeydown="if(event.key==='Enter'||event.key===' ')openCompare()">
     </section>
   </div>
 
@@ -763,14 +774,14 @@ async function loadProfile(id){
       winrate:games?wins/games*100:null
     };
   }).filter(h=>h.games>0):[];
-  render(ms2,p,heroes); $('#landing').style.display='none';
+  render(ms2,p,heroes); $('#landing').style.display='none'; try{window.dpiEnhance&&window.dpiEnhance()}catch(e){console.warn(e)}
 }
 $('#load').onclick=async()=>{
   const id=accountFrom($('#steam').value.trim());
-  if(!id){$('#app').innerHTML='<div class="card section"><h2>Не удалось найти Steam ID</h2><p>Вставь числовой Steam ID или ссылку вида steamcommunity.com/profiles/...</p></div>';return}
+  if(!id){if(window.dpiNameSearch){window.dpiNameSearch($('#steam').value.trim());return} $('#app').innerHTML='<div class="card section"><h2>Не удалось найти Steam ID</h2><p>Вставь числовой Steam ID или ссылку вида steamcommunity.com/profiles/...</p></div>';return}
   $('#load').disabled=true;$('#load').textContent='Анализирую…';
   $('#app').innerHTML=loadingMarkup('Dota Player Index загружает ваш профиль…','Получаем профиль и историю матчей.');
-  try{await loadProfile(id)}catch(e){const msg=String(e?.message||e); const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg); $('#app').innerHTML=`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`}
+  try{await loadProfile(id)}catch(e){const msg=String(e?.message||e); const rate=/429|Failed to fetch|NetworkError|Load failed/i.test(msg); const noRanked=/ranked-матчи/i.test(msg); if(noRanked){$('#app').innerHTML=`<div class="card section"><h2>Ranked-матчи не найдены</h2><p>OpenDota не вернул ranked-матчи для этого аккаунта. Частые причины: закрыта публичная история матчей в настройках Dota 2 или аккаунт давно не играл ranked.</p><p class="notice">Загляни в профиль на Dotabuff: там видно, есть ли игры и открыта ли история.</p><div class="v4actions"><a class="btn" href="https://www.dotabuff.com/players/${esc(id)}" target="_blank" rel="noopener">Открыть профиль в Dotabuff</a></div></div>`; return} $('#app').innerHTML=`<div class="card section"><h2>Ошибка загрузки</h2><p>${esc(msg)}.</p><p class="notice">${rate?'OpenDota сейчас ограничивает или не принимает браузерные запросы. Я добавил повторные попытки и более медленную загрузку матчей, но если API перегружен — подожди 30–60 секунд и попробуй снова.':'Проверь Steam ID и попробуй ещё раз.'}</p></div>`}
   finally{$('#load').disabled=false;$('#load').textContent='Анализировать'}
 };
 $('#steam').addEventListener('keydown',e=>{
@@ -827,7 +838,7 @@ function lossAnalysis(ms){
     ['Teamfight',Number.isFinite(metric(wins,'teamfight_participation'))?metric(wins,'teamfight_participation')*100:null,Number.isFinite(metric(losses,'teamfight_participation'))?metric(losses,'teamfight_participation')*100:null,0,'участие в драках'],
     ['Deaths',metric(wins,'deaths'),metric(losses,'deaths'),1,'отданный темп']
   ];
-  const scored=rows.filter(r=>Number.isFinite(r[1])&&Number.isFinite(r[2])).map(r=>{const d=r[1]-r[2],bad=r[0]==='Deaths'?d>0:d<0;return {...r,d,bad,impact:Math.abs(d)/Math.max(Math.abs(r[1]),Math.abs(r[2]),1)}}).filter(r=>r.bad).sort((a,b)=>b.impact-a.impact);
+  const scored=rows.filter(r=>Number.isFinite(r[1])&&Number.isFinite(r[2])).map(r=>{const d=r[1]-r[2],bad=r[0]==='Deaths'?d<0:d>0;return {...r,d,bad,impact:Math.abs(d)/Math.max(Math.abs(r[1]),Math.abs(r[2]),1)}}).filter(r=>r.bad).sort((a,b)=>b.impact-a.impact);
   return {wins,losses,rows,drivers:scored.slice(0,4)};
 }
 function personalizedAdvice(a){
@@ -856,7 +867,7 @@ function openRecent50Summary(){
 function openWhyLose(){
   const ms=window.__dpiMatches||[], c=window.__dpiCurrent; if(!ms.length||!c)return;
   const a=lossAnalysis(ms), adv=personalizedAdvice(a);
-  const table=a.rows.map(r=>{const d=r[1]-r[2],bad=r[0]==='Deaths'?d>0:d<0;const txt=Number.isFinite(d)?`${d>=0?'+':''}${d.toFixed(r[3])} · ${bad?'хуже в LOSS':'лучше в LOSS'}`:'нет данных';return `<tr><td>${esc(r[0])}</td><td>${fmt(r[1],r[3])}${r[0]==='Teamfight'?'%':''}</td><td>${fmt(r[2],r[3])}${r[0]==='Teamfight'?'%':''}</td><td class="${bad?'lossDiffBad':'lossDiffGood'}">${esc(txt)}</td></tr>`}).join('');
+  const table=a.rows.map(r=>{const d=r[1]-r[2],bad=r[0]==='Deaths'?d<0:d>0;const txt=Number.isFinite(d)?`${d>=0?'+':''}${d.toFixed(r[3])} · ${bad?'хуже в LOSS':'лучше в LOSS'}`:'нет данных';return `<tr><td>${esc(r[0])}</td><td>${fmt(r[1],r[3])}${r[0]==='Teamfight'?'%':''}</td><td>${fmt(r[2],r[3])}${r[0]==='Teamfight'?'%':''}</td><td class="${bad?'lossDiffBad':'lossDiffGood'}">${esc(txt)}</td></tr>`}).join('');
   const advice=a.drivers.slice(0,4).map(r=>{const w=r[1],l=r[2];let target='',text='';if(r[0]==='Deaths'){target=`≤ ${fmt(w+0.3,1)} смертей`;text=`В поражениях ${fmt(l,1)}, в победах ${fmt(w,1)}. Убирай рискованные смерти после получения преимущества.`}else{target=`≈ ${fmt(w,r[3])}`;text=`В победах ${fmt(w,r[3])}, в поражениях ${fmt(l,r[3])}. Цель — подтянуть этот показатель к своей собственной цифре побед.`}return `<div class="lossAdvice"><b>${esc(r[0])} → ${esc(target)}</b><span>${esc(text)}</span></div>`}).join('');
   const stageData=[[0,10],[10,20],[20,30],[30,null]].map(([lo,hi])=>{const all=ms.filter(m=>{const t=n(m.duration)/60;return t>=lo&&(hi==null||t<hi)}),w=all.filter(win);return {label:`${lo}–${hi??'+'} мин`,games:all.length,wr:all.length?w.length/all.length*100:null,gpm:metric(all,'gold_per_min'),deaths:metric(all,'deaths')}});
   const stageHtml=stageData.map(x=>`<div class="lossStage"><b>${x.label}</b><strong>${fmt(x.wr,0)}% WR</strong><span>${x.games} игр · GPM ${fmt(x.gpm,0)} · deaths ${fmt(x.deaths,1)}</span></div>`).join('');
@@ -960,7 +971,7 @@ async function runCompare(myIndex,myName){
     const full=await hydrateCompare50(id,base,(i,t)=>{const el=$('#compareProgress');if(el)el.textContent=`${i} / ${t}`});
     const heroRoleMap=new Map((Array.isArray(hstats)?hstats:[]).map(h=>[Number(h.id),Array.isArray(h.roles)?h.roles:[]]));
     full.forEach(m=>{m.__heroRoles=heroRoleMap.get(Number(m.hero_id))||[];});
-    const other=calc(full), otherName=p?.profile?.personaname||p?.personaname||p?.name||'Игрок', otherRole=roleFrom(full), otherRoleIcon=roleAsset(otherRole), otherAvatar=p?.profile?.avatarfull||p?.profile?.avatarmedium||p?.profile?.avatar||'', otherTier=p?.rank_tier??p?.profile?.rank_tier??full.find(x=>x?.rank_tier!=null)?.rank_tier??base.find(x=>x?.rank_tier!=null)?.rank_tier, otherRank=rankLabel(otherTier), otherRankIcon=rankAsset(otherTier), myProfile=window.__dpiProfile||{}, myAvatar=myProfile.avatarfull||myProfile.avatarmedium||myProfile.avatar||'', myRole=window.__dpiRole||'Смешанная роль', myRoleIcon=roleAsset(myRole), myTier=myProfile.rank_tier??myProfile?.profile?.rank_tier??window.__dpiMatches?.find(x=>x?.rank_tier!=null)?.rank_tier, myRank=rankLabel(myTier), myRankIcon=rankAsset(myTier), diff=Math.round(myIndex-other.index);
+    const _r0=DPI_ROLE; DPI_ROLE=roleKeyFrom(full); const other=calc(full); DPI_ROLE=_r0; const otherName=p?.profile?.personaname||p?.personaname||p?.name||'Игрок', otherRole=roleFrom(full), otherRoleIcon=roleAsset(otherRole), otherAvatar=p?.profile?.avatarfull||p?.profile?.avatarmedium||p?.profile?.avatar||'', otherTier=p?.rank_tier??p?.profile?.rank_tier??full.find(x=>x?.rank_tier!=null)?.rank_tier??base.find(x=>x?.rank_tier!=null)?.rank_tier, otherRank=rankLabel(otherTier), otherRankIcon=rankAsset(otherTier), myProfile=window.__dpiProfile||{}, myAvatar=myProfile.avatarfull||myProfile.avatarmedium||myProfile.avatar||'', myRole=window.__dpiRole||'Смешанная роль', myRoleIcon=roleAsset(myRole), myTier=myProfile.rank_tier??myProfile?.profile?.rank_tier??window.__dpiMatches?.find(x=>x?.rank_tier!=null)?.rank_tier, myRank=rankLabel(myTier), myRankIcon=rankAsset(myTier), diff=Math.round(myIndex-other.index);
     const relation=diff===0?'Одинаковый Player Index':diff>0?`У тебя выше на ${Math.abs(diff)}`:`У второго игрока выше на ${Math.abs(diff)}`;
     $('#modalContent').innerHTML=`<div class="compareBox"><div class="compareLabel">СРАВНЕНИЕ ИГРОКОВ</div><div class="compareNames"><div class="compareSide">${myAvatar?`<img class="compareAvatar" src="${esc(myAvatar)}" alt="">`:''}<span>ТЫ</span><b>${esc(myName)}</b><div class="compareRankRow">${myRankIcon?`<img class="compareRankIcon" src="${myRankIcon}" alt="${esc(myRank)}">`:''}<span class="compareRankText">${esc(myRank)}</span></div><div class="compareRoleLine">${myRoleIcon?`<img class="compareRoleIcon" src="assets/${myRoleIcon}" alt="">`:''}<b>${esc(myRole)}</b></div><div class="compareIndex">${Math.round(myIndex)}</div><div class="compareStats"><div class="compareStat"><span>WR</span><b>${fmt(window.__dpiCurrent?.wr,1)}%</b></div><div class="compareStat"><span>GPM</span><b>${fmt(window.__dpiCurrent?.gpm,0)}</b></div><div class="compareStat"><span>XPM</span><b>${fmt(window.__dpiCurrent?.xpm,0)}</b></div><div class="compareStat"><span>Роль</span><b>${esc(myRole)}</b></div></div></div><div class="compareVs">VS</div><div class="compareSide">${otherAvatar?`<img class="compareAvatar" src="${esc(otherAvatar)}" alt="">`:''}<span>ИГРОК</span><b>${esc(otherName)}</b><div class="compareRankRow">${otherRankIcon?`<img class="compareRankIcon" src="${otherRankIcon}" alt="${esc(otherRank)}">`:''}<span class="compareRankText">${esc(otherRank)}</span></div><div class="compareRoleLine">${otherRoleIcon?`<img class="compareRoleIcon" src="assets/${otherRoleIcon}" alt="">`:''}<b>${esc(otherRole)}</b></div><div class="compareIndex">${Number.isFinite(other.index)?Math.round(other.index):'—'}</div><div class="compareStats"><div class="compareStat"><span>WR</span><b>${fmt(other.wr,1)}%</b></div><div class="compareStat"><span>GPM</span><b>${fmt(other.gpm,0)}</b></div><div class="compareStat"><span>XPM</span><b>${fmt(other.xpm,0)}</b></div><div class="compareStat"><span>Роль</span><b>${esc(otherRole)}</b></div></div></div></div><div class="compareDiff"><div class="compareLabel">РАЗНИЦА PLAYER INDEX</div><b>${esc(relation)}</b></div><div class="compareHint">Сравнение использует одинаковую методику и последние доступные ranked-матчи обоих игроков.</div></div>`;
   }catch(e){$('#modalContent').innerHTML=`<h2>Не удалось сравнить</h2><p class="sub">${esc(e.message)}</p><button class="btn secondary" onclick="openCompare()">Попробовать снова</button>`}

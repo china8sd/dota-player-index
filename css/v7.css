@@ -1,0 +1,17 @@
+/* 7.0: дуэль, сравнение периодов, переключатели, светлая тема */
+.dpiTools{display:flex;gap:8px}.dpiTools button{min-width:44px;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font:700 14px Archivo,sans-serif;cursor:pointer}
+.v4heroPill{cursor:pointer}
+.duel{width:100%;border-collapse:collapse;margin:12px 0}.duel th,.duel td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:center;font-weight:500}
+.duel th{color:var(--muted);font-weight:500;width:42%}.duel td{font:700 20px var(--display)}.duel thead td{font-size:15px;color:var(--muted)}
+.duel tr.a td:first-child,.duel tr.b td:last-child{color:var(--green)}
+.duelHead{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;text-align:center;font:700 22px var(--display)}.duelHead span{font-size:34px;color:var(--gold)}
+.pcSelf select{margin-left:6px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#10141b;color:var(--text);font:600 15px Archivo,sans-serif}
+.pcSelf{grid-column:1/-1}
+html[data-theme=light]{--bg:#f3f1ec;--card:rgba(255,255,255,.94);--line:rgba(20,24,32,.12);--text:#161a22;--muted:#5d6676;--gold:#9a6f17;--green:#1a8a5c;--red:#c9342a}
+html[data-theme=light] body:before{background:linear-gradient(180deg,rgba(243,241,236,.82),#f3f1ec 70%),url("../assets/bg-main.webp") center top/cover no-repeat;filter:saturate(.5)}
+html[data-theme=light] .indexRing::after{background:#fff}
+html[data-theme=light] .pcard{background:linear-gradient(160deg,#fff,#efeae0)}
+html[data-theme=light] .dpiNav{background:linear-gradient(#f3f1ec 70%,transparent)}
+html[data-theme=light] .dpiNav button,html[data-theme=light] .search,html[data-theme=light] .pcSelf select{background:#fff;color:var(--text)}
+html[data-theme=light] .modalBox{background:#fff;color:var(--text)}
+html[data-theme=light] .btn.secondary{background:rgba(20,24,32,.06);color:var(--text)}

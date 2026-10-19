@@ -1,0 +1,18 @@
+/* 12.0 */
+.pcTop{grid-template-columns:auto minmax(0,auto) 1fr auto}
+.pcHeroes{display:flex;gap:8px;justify-self:center;align-items:center}
+.pcHeroes img{width:84px;height:48px;object-fit:cover;border-radius:3px;border:1px solid var(--line);background:#0b0e13}
+@media(max-width:900px){.pcHeroes img{width:62px;height:35px}}
+@media(max-width:600px){.pcTop{grid-template-columns:auto 1fr}.pcHeroes{grid-column:1/-1;justify-self:start}}
+.errDet{margin-top:18px;display:grid;gap:12px}.errMeta{margin:0;color:var(--muted);font-size:14px}
+.errCard{border:1px solid var(--line);border-left:5px solid var(--red);padding:16px;background:rgba(255,255,255,.02)}
+.errCard h3{margin:0 0 6px;font:800 26px var(--display)}
+.errNums{display:flex;gap:26px;margin-bottom:8px}.errNums span{color:var(--muted);font-size:13px}.errNums b{display:block;font:800 30px var(--display);color:var(--text)}
+.errCard p{margin:7px 0;color:#c9d0db}html[data-theme=light] .errCard p{color:#394150}
+.pcAxes div{grid-template-columns:112px 1fr 28px}
+@media(max-width:600px){
+ .pcStamp{display:none}
+ .pcHeroes{width:100%;gap:6px;justify-self:stretch}
+ .pcHeroes img{flex:1 1 0;min-width:0;width:0;height:auto;aspect-ratio:16/9}
+}
+.errSub{margin:6px 0 0;font:800 24px var(--display)}
