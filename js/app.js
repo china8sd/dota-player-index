@@ -152,11 +152,24 @@ function roleInfoFrom(ms){
       else if(coreRank>=.52) role=3;
       else role=5;
     }
-    return {role,coreRank,supportRank,lane};
+    // --- Сверка с таблицей героев (js/roles.js). Поведение игрока — основа; таблица решает, когда доказательств мало.
+    const prior=(window.dpiHeroPrior&&m?.hero_id!=null)?window.dpiHeroPrior(m.hero_id):null;
+    let src=prior?'match':'none';
+    if(prior&&prior.length&&role&&!prior.includes(role)){
+      const laneKnown=lane>=1&&lane<=4, decisive=laneKnown&&Math.abs(coreRank-.5)>=.15;
+      if(decisive&&valid.length>=15){src='offmeta'}   // уверенное поведение против героя: оставляем роль по поведению
+      else{                                            // мало доказательств (нет линии, ранги близки, мало игр): уточняем по герою
+        const lb=p=>lane===2?(p===2?.3:0):lane===1?((p===1||p===5)?.3:0):lane===3?((p===3||p===4)?.3:0):roam?(p===4?.2:0):0;
+        const fit=p=>(p<=3?coreRank:supportRank)+lb(p)+(p===5?(1-coreRank)*.1:0);
+        role=prior.slice().sort((a,b)=>fit(b)-fit(a)||a-b)[0];src='hero';
+      }
+    }
+    return {role,coreRank,supportRank,lane,src};
   };
 
   const rows=valid.map(classify);
   rows.forEach(r=>{if(r.role)counts[r.role]++});
+  const heroKnown=rows.filter(r=>r.src!=='none').length,heroMatch=rows.filter(r=>r.src==='match').length,heroAdj=rows.filter(r=>r.src==='hero').length,heroOff=rows.filter(r=>r.src==='offmeta').length;
   const total=valid.length;
   const parsedShare=valid.filter(m=>m&&m.lane_role!=null).length/Math.max(1,valid.length);
   const sorted=keys.slice().sort((a,b)=>counts[b]-counts[a]||a-b);
@@ -165,11 +178,15 @@ function roleInfoFrom(ms){
   const close=counts[second]>=Math.max(5,Math.round(total*.20)) && gap<=Math.max(3,Math.round(total*.12));
   const secondary=close?labels[second]:'';
   const topRatio=counts[top]/Math.max(1,total);
-  const confidence=Math.max(0,Math.min(96,Math.round(52+topRatio*35+(gap/Math.max(1,total))*20-(secondary?12:0)-Math.round((1-parsedShare)*18))));
+  let confidence=Math.max(0,Math.min(96,Math.round(52+topRatio*35+(gap/Math.max(1,total))*20-(secondary?12:0)-Math.round((1-parsedShare)*18))));
+  if(heroKnown>=10)confidence+=Math.round((heroMatch/heroKnown-.6)*10); // герои подтверждают роль -> чуть выше
+  confidence-=Math.round(heroAdj/Math.max(1,total)*20);                    // роль выведена по таблице, а не по поведению -> ниже
+  if(total<15)confidence=Math.min(confidence,70);                         // мало игр -> уверенность ограничена
+  confidence=Math.max(0,Math.min(96,confidence));
   const confidenceLabel=confidence>=78?'высокая':confidence>=62?'средняя':'низкая';
   const rawScores={}; keys.forEach(k=>rawScores[k]=counts[k]);
 
-  return {primary:labels[top],secondary,counts,laneCounts,sorted,total,confidence,confidenceLabel,rawScores,parsedShare};
+  return {primary:labels[top],secondary,counts,laneCounts,sorted,total,confidence,confidenceLabel,rawScores,parsedShare,heroInfo:{known:heroKnown,match:heroMatch,adjusted:heroAdj,offmeta:heroOff}};
 }
 function roleKeyFrom(ms){
   const info=roleInfoFrom(ms);
@@ -185,7 +202,7 @@ function roleBreakdownHtml(ms){
   const info=roleInfoFrom(ms);
   if(!info.total)return '';
   const icon=roleAsset(info.primary);
-  return `<div class="roleMain"><div class="roleMainText">${icon?`<img class="roleMainIcon" src="assets/${icon}" alt="">`:''}<b>${esc(info.primary)}</b></div><button class="roleOtherBtn" onclick="openRoleList()">Остальные роли</button></div><div class="sub roleConfidence">Определение: ${esc(info.confidenceLabel)} · ${Math.round(info.confidence)}%${info.parsedShare<.7?` · разобрано матчей ${Math.round(info.parsedShare*100)}%`:''}</div>`;
+  return `<div class="roleMain"><div class="roleMainText">${icon?`<img class="roleMainIcon" src="assets/${icon}" alt="">`:''}<b>${esc(info.primary)}</b></div><button class="roleOtherBtn" onclick="openRoleList()">Остальные роли</button></div><div class="sub roleConfidence">Определение: ${esc(info.confidenceLabel)} · ${Math.round(info.confidence)}%${info.parsedShare<.7?` · разобрано матчей ${Math.round(info.parsedShare*100)}%`:''}</div>${info.heroInfo&&info.heroInfo.known?`<div class="sub roleConfidence">Сверка с героями: роль совпала в ${info.heroInfo.match} из ${info.heroInfo.known} игр${info.heroInfo.adjusted?`, уточнена по герою в ${info.heroInfo.adjusted}`:''}${info.heroInfo.offmeta?`, нестандартно сыграно ${info.heroInfo.offmeta}`:''}${info.total<15?'. Мало игр: роль уточняется по героям':''}.</div>`:''}`;
 }
 function confidence(count){
   if(count<1)return ['нет данных',''];
